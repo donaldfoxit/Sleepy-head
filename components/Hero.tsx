@@ -1,179 +1,139 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, Star } from "lucide-react";
-
-gsap.registerPlugin(ScrollTrigger);
-
-// The list of names to cycle through
-const NICKNAMES = [
-    "Babe",
-    "Mixxy",
-    "Sunshine",
-    "Miamor",
-    "Princess"
-];
+import React, { useRef, useEffect } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowDown, Star } from "lucide-react";
 
 export default function Hero() {
     const containerRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [index, setIndex] = useState(0);
 
-    // 1. Text Cycle Logic - SLOWED DOWN to 3.5s
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setIndex((prevIndex) => (prevIndex + 1) % NICKNAMES.length);
-        }, 3500);
-        return () => clearInterval(timer);
-    }, []);
+    // Parallax effect for the text
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end start"],
+    });
 
-    // 2. Parallax Logic
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.to(textRef.current, {
-                yPercent: 50,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top top",
-                    end: "bottom top",
-                    scrub: true,
-                },
-            });
-        }, containerRef);
-        return () => ctx.revert();
-    }, []);
-
-    // 3. Generate floating particles
-    const particles = Array.from({ length: 40 }, (_, i) => ({
-        id: i,
-        size: Math.random() * 6 + 2,
-        left: Math.random() * 100,
-        delay: Math.random() * 10,
-        duration: Math.random() * 20 + 25,
-        opacity: Math.random() * 0.4 + 0.1,
-    }));
+    const yText = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+    const opacityText = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
     return (
         <section
             ref={containerRef}
-            className="relative w-full h-screen overflow-hidden bg-black"
+            className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center"
         >
-            {/* --- BACKGROUND LAYER --- */}
+            {/* --- CINEMATIC BACKGROUND --- */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-950 via-black to-purple-950" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+                {/* 1. The Video */}
+                <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-80"
+                >
+                    <source src="/169443-841382814_small.mp4" type="video/mp4" />
+                </video>
+
+                {/* 2. Dark Cinematic Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80" />
+                <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/60" />
+
+                {/* 3. Film Grain Overlay */}
+                {/* CSS-based noise texture */}
+                <div className="absolute inset-0 opacity-[0.08] pointer-events-none"
+                    style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
+                />
             </div>
 
-            {/* --- PARTICLES LAYER --- */}
-            <div className="absolute inset-0 z-5 overflow-hidden pointer-events-none">
-                {particles.map((particle) => (
+            {/* --- MAGAZINE LAYOUT CONTENT --- */}
+            <motion.div
+                style={{ y: yText, opacity: opacityText }}
+                className="relative z-10 w-full max-w-[90vw] h-full flex flex-col justify-between py-12 md:py-20 select-none"
+            >
+
+                {/* Top Section: Date & Location (Movie Poster Style) */}
+                <div className="flex justify-between items-start text-white/60 text-xs md:text-sm tracking-[0.2em] uppercase font-light mix-blend-difference">
+                    <div className="flex flex-col gap-1">
+                        <span>Est. 2024</span>
+                        <span>London, UK</span>
+                    </div>
+                    <div className="flex flex-col text-right gap-1">
+                        <span>Volume No. 1</span>
+                        <span>The Love Letter</span>
+                    </div>
+                </div>
+
+                {/* Center Section: Main Title */}
+                <div className="flex flex-col items-center justify-center flex-grow">
+
+                    {/* "To My" - Centered above Favorite */}
                     <motion.div
-                        key={particle.id}
-                        className="absolute rounded-full bg-white/20 backdrop-blur-sm"
-                        style={{
-                            width: particle.size,
-                            height: particle.size,
-                            left: `${particle.left}%`,
-                            top: "-10%",
-                            opacity: particle.opacity,
-                        }}
-                        animate={{
-                            y: ["0vh", "110vh"],
-                            x: [0, Math.random() * 100 - 50, 0],
-                            scale: [1, 1.3, 1],
-                        }}
-                        transition={{
-                            duration: particle.duration,
-                            repeat: Infinity,
-                            delay: particle.delay,
-                            ease: "linear",
-                        }}
-                    />
-                ))}
-            </div>
-
-            {/* Film Grain Texture */}
-            <div className="bg-noise absolute inset-0 z-[6] opacity-10 pointer-events-none" />
-
-            {/* --- CONTENT LAYER --- */}
-            <div className="relative z-10 flex items-center justify-center w-full h-full px-4">
-
-                {/* Main Container */}
-                <div ref={textRef} className="relative w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-center md:text-left">
-
-                    {/* Sticker 1: Floating Heart (Left) */}
-                    <motion.div
-                        animate={{ y: [-15, 15, -15], rotate: [-5, 5, -5] }}
-                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -top-24 left-10 md:-left-12 md:-top-32 z-20"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.2 }}
+                        className="mb-[-2vw] z-20"
                     >
-                        <div className="flex items-center justify-center w-20 h-20 md:w-28 md:h-28 bg-rose-500 rounded-full shadow-2xl rotate-[-12deg] border-4 border-white/10 backdrop-blur-sm">
-                            <Heart className="text-white w-10 h-10 md:w-14 md:h-14 fill-white" strokeWidth={2.5} />
-                        </div>
+                        <p className="font-serif italic text-2xl md:text-3xl text-white mix-blend-overlay">
+                            To My
+                        </p>
                     </motion.div>
 
-                    {/* STATIC TEXT: "HEY" */}
-                    <h1 className="text-7xl md:text-9xl font-bold tracking-tight text-white drop-shadow-2xl">
-                        Hey
-                    </h1>
+                    {/* "FAVORITE" - Huge, Bold, Serif */}
+                    <div className="relative">
+                        <motion.h1
+                            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                            transition={{ duration: 1.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="text-[18vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tighter"
+                            style={{ fontFamily: "'Playfair Display', serif" }} // Assuming Google Font avail or fallback
+                        >
+                            FAVORITE
+                        </motion.h1>
 
-                    {/* DYNAMIC TEXT SLIDER */}
-                    {/* FIXED: Increased height (h-24/h-32) so text isn't cut off */}
-                    <div className="relative h-24 md:h-40 overflow-hidden flex flex-col justify-center min-w-[280px] md:min-w-[500px]">
-                        <AnimatePresence mode="wait">
-                            <motion.span
-                                key={index}
-                                initial={{ y: "100%", opacity: 0 }}
-                                animate={{ y: "0%", opacity: 1 }}
-                                exit={{ y: "-100%", opacity: 0 }}
-                                transition={{ duration: 0.8, ease: [0.2, 1, 0.4, 1] }}
-                                className="block text-6xl md:text-9xl font-serif italic text-rose-400 drop-shadow-lg absolute left-0 right-0 md:text-left text-center"
-                                style={{ lineHeight: 1.1 }}
-                            >
-                                {NICKNAMES[index]}
-                            </motion.span>
-                        </AnimatePresence>
-
-                        {/* The Red Scribble Underline */}
-                        <svg className="absolute w-full bottom-0 left-0 -z-10 text-rose-600" viewBox="0 0 100 20" fill="none" height="20">
-                            <path d="M0 10 Q 50 20 100 10" stroke="currentColor" strokeWidth="8" strokeOpacity="0.8" />
-                        </svg>
+                        {/* Decorative Star */}
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute top-[10%] right-[5%] text-white mix-blend-overlay"
+                        >
+                            <Star size={48} fill="white" />
+                        </motion.div>
                     </div>
 
-                    {/* Sticker 2: Glowing Star (Right) */}
-                    <motion.div
-                        animate={{ scale: [1, 1.2, 1], rotate: [0, 10, 0] }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                        className="absolute -bottom-20 right-4 md:-right-8 z-20"
+                    {/* "PERSON" - Outline or Lighter Weight */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.5, delay: 0.8 }}
+                        className="text-[12vw] leading-[0.8] font-serif italic text-white/90 -mt-[2vw] mix-blend-overlay"
                     >
-                        <Star className="text-yellow-400 w-16 h-16 md:w-24 md:h-24 fill-yellow-400 drop-shadow-[0_0_25px_rgba(250,204,21,0.5)]" />
-                    </motion.div>
-
-                    {/* Sticker 3: Sparkles (Top Right) */}
-                    <motion.div
-                        animate={{ rotate: [0, 360], scale: [0.8, 1.1, 0.8] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                        className="absolute -top-16 right-10 md:right-20 opacity-60"
-                    >
-                        <Sparkles className="text-pink-200 w-12 h-12 md:w-20 md:h-20 fill-pink-200" />
-                    </motion.div>
+                        person
+                    </motion.h1>
 
                 </div>
-            </div>
 
-            {/* SCROLL INDICATOR */}
-            <motion.div
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/30 text-xs tracking-[0.3em] uppercase z-20"
-                animate={{ y: [0, 10, 0], opacity: [0.3, 0.6, 0.3] }}
-                transition={{ duration: 2, repeat: Infinity }}
-            >
-                Scroll for more
+                {/* Bottom Section: Scroll Indicator */}
+                <div className="flex justify-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, y: [0, 10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+                        className="flex flex-col items-center gap-2 text-white/50"
+                    >
+                        <span className="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+                        <ArrowDown size={16} />
+                    </motion.div>
+                </div>
+
             </motion.div>
+
+            {/* --- OVERLAY TEXTURE --- */}
+            {/* A subtle texture to unify everything */}
+            <div className="absolute inset-0 pointer-events-none z-20 mix-blend-soft-light opacity-30"
+                style={{ background: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}
+            />
 
         </section>
     );

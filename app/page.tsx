@@ -6,6 +6,9 @@ import Gate from "@/components/Gate";
 import LoadingScreen from "@/components/LoadingScreen";
 import Hero from "@/components/Hero";
 import Gallery from "@/components/Gallery";
+import FilmReel from "@/components/FilmReel";
+import LoveLetter from "@/components/LoveLetter";
+import VinylPlayer from "@/components/VinylPlayer";
 
 export default function Home() {
     const isUnlocked = useStore((state) => state.isUnlocked);
@@ -29,6 +32,17 @@ export default function Home() {
 
                     {/* Gallery Section */}
                     <Gallery />
+
+                    {/* --- PROPOSAL SECTIONS (FOR REVIEW) --- */}
+
+                    {/* Option A: Timeline */}
+                    <FilmReel />
+
+                    {/* Option B: Letter */}
+                    <LoveLetter />
+
+                    {/* Option C: Vinyl */}
+                    <VinylPlayer />
                 </div>
             )}
         </main>

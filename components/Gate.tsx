@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { useStore } from "@/store/useStore";
-import { Heart } from "lucide-react";
+import { Heart, Sparkles } from "lucide-react";
 
 // --- CONFIGURATION ---
 const MAGIC_WORD = "forever"; // <--- CHANGE THIS TO YOUR MAGIC WORD
@@ -108,21 +108,25 @@ export default function Gate() {
 
         if (input.toLowerCase().trim() === MAGIC_WORD.toLowerCase()) {
             // --- SUCCESS SEQUENCE ---
-            playSuccessSound(); // Play custom success sound
+            playSuccessSound();
 
-            // Create magical sparkles
+            // 1. MASSIVE SPARKLE EXPLOSION
             const sparkleContainer = document.createElement('div');
-            sparkleContainer.style.cssText = 'position: fixed; inset: 0; z-index: 150; pointer-events: none;';
-            containerRef.current?.appendChild(sparkleContainer);
+            sparkleContainer.style.cssText = 'position: fixed; inset: 0; z-index: 9999; pointer-events: none; overflow: hidden;';
+            document.body.appendChild(sparkleContainer);
 
-            // Generate 50 sparkles
-            for (let i = 0; i < 50; i++) {
+            // Generate 300 sparkles for "Massive" effect
+            for (let i = 0; i < 300; i++) {
                 const sparkle = document.createElement('div');
-                const size = Math.random() * 8 + 4;
-                const startX = 50 + (Math.random() - 0.5) * 20; // Center with slight variation
-                const startY = 50 + (Math.random() - 0.5) * 20;
-                const endX = Math.random() * 100;
-                const endY = Math.random() * 100;
+                const size = Math.random() * 6 + 2;
+                // Start from center
+                const startX = 50;
+                const startY = 50;
+                // Explode outwards 360 degrees
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 100 + 20; // Explode far out
+                const endX = 50 + Math.cos(angle) * distance;
+                const endY = 50 + Math.sin(angle) * distance;
 
                 sparkle.style.cssText = `
                     position: absolute;
@@ -130,53 +134,60 @@ export default function Gate() {
                     height: ${size}px;
                     left: ${startX}%;
                     top: ${startY}%;
-                    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,200,255,0.8) 50%, transparent 100%);
+                    background: #fda4af;
                     border-radius: 50%;
-                    box-shadow: 0 0 ${size * 2}px rgba(255,255,255,0.8), 0 0 ${size * 4}px rgba(255,200,255,0.4);
-                    pointer-events: none;
+                    box-shadow: 0 0 ${size * 4}px rgba(251, 113, 133, 0.9);
+                    transform: translate(-50%, -50%);
                 `;
-
                 sparkleContainer.appendChild(sparkle);
 
-                // Animate sparkle
+                // Animate expansion
                 gsap.to(sparkle, {
                     left: `${endX}%`,
                     top: `${endY}%`,
                     opacity: 0,
                     scale: 0,
-                    duration: 1.5 + Math.random() * 0.5,
-                    delay: Math.random() * 0.3,
-                    ease: "power2.out",
-                    onComplete: () => sparkle.remove()
+                    duration: Math.random() * 2 + 1, // 1-3 seconds
+                    delay: Math.random() * 0.2, // Slight staggered burst
+                    ease: "power4.out",
                 });
             }
 
-            gsap.to(contentRef.current, {
-                scale: 1.03,
-                duration: 0.2,
-                ease: "back.out(1.7)",
+            // 2. THE TRANSITION: "Sparkle Whiteout"
+            // Instead of blur, we flash white and then dissolve
+            const whiteoutOverlay = document.createElement('div');
+            whiteoutOverlay.style.cssText = 'position: fixed; inset: 0; bg-white; z-index: 9998; background: white; opacity: 0; pointer-events: none;';
+            document.body.appendChild(whiteoutOverlay);
+
+            // Flash white quickly to simulate explosion intensity
+            gsap.to(whiteoutOverlay, {
+                opacity: 1,
+                duration: 1.5,
+                ease: "power2.inOut",
                 onComplete: () => {
-                    gsap.to(contentRef.current, {
+                    // UNLOCK THE APP WHILE SCREEN IS WHITE
+                    setIsUnlocked(true);
+
+                    // Fade out the white overlay to reveal the new page
+                    gsap.to(whiteoutOverlay, {
                         opacity: 0,
-                        scale: 0.97,
-                        y: -20,
-                        duration: 0.7,
-                        ease: "power2.in"
+                        duration: 2,
+                        delay: 0.5,
+                        onComplete: () => {
+                            whiteoutOverlay.remove();
+                            sparkleContainer.remove();
+                        }
                     });
                 }
             });
 
-            gsap.to(containerRef.current, {
-                scale: 1.15,
+            // Fade OUT the current content immediately
+            gsap.to([contentRef.current, bgRef.current], {
                 opacity: 0,
-                filter: "blur(40px)",
-                duration: 1.8,
-                ease: "power4.inOut",
-                delay: 0.6,
-                onComplete: () => {
-                    setIsUnlocked(true);
-                },
+                scale: 0.9,
+                duration: 0.5
             });
+
 
         } else {
             // --- ERROR SEQUENCE ---
@@ -216,7 +227,7 @@ export default function Gate() {
             </div>
 
             {/* Floating Particles/Bubbles */}
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {particles.map((particle) => (
                     <motion.div
                         key={particle.id}
@@ -273,18 +284,16 @@ export default function Gate() {
                     What is the <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-300 to-pink-300">magic word</span>?
                 </h1>
 
-                {/* Minimal Input Field - Smaller */}
                 <motion.form
                     onSubmit={handleSubmit}
                     animate={error ? { x: [-10, 10, -10, 10, -6, 6, 0] } : {}}
                     transition={{ duration: 0.4 }}
-                    className="w-full relative group mb-6"
+                    className="w-full relative group mb-6 flex justify-center"
                 >
-                    {/* Subtle Glow */}
-                    <div className={`absolute -inset-3 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-purple-500/10 rounded-xl blur-lg transition-opacity duration-500 ${isFocused ? 'opacity-100' : 'opacity-0'}`} />
+                    {/* Minimal Input Container */}
+                    <div className="relative w-full max-w-[300px]">
 
-                    {/* Input */}
-                    <div className="relative">
+                        {/* The Input Itself */}
                         <input
                             ref={inputRef}
                             type="text"
@@ -293,18 +302,30 @@ export default function Gate() {
                             onFocus={() => setIsFocused(true)}
                             onBlur={() => setIsFocused(false)}
                             placeholder="enter here..."
-                            className="w-full py-4 px-6 text-xl md:text-2xl text-center text-white/85 bg-white/[0.03] backdrop-blur-md border border-white/[0.08] rounded-xl outline-none placeholder:text-white/20 focus:border-rose-400/30 transition-all duration-500 font-light"
-                            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                            className="w-full py-2 text-xl md:text-2xl text-center text-white/90 bg-transparent border-b border-white/20 outline-none placeholder:text-white/10 transition-all duration-300 font-light tracking-widest uppercase"
+                            style={{ fontFamily: "'Cormorant Garamond', serif" }} // Elegant refined font
                             autoFocus
                         />
 
-                        {/* Accent Line */}
+                        {/* Animated Glow Line / Underline */}
                         <motion.div
-                            className="absolute bottom-0 left-1/2 h-px bg-gradient-to-r from-transparent via-rose-400/50 to-transparent"
-                            initial={{ width: 0, x: "-50%" }}
-                            animate={{ width: isFocused ? "80%" : "0%", x: "-50%" }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className="absolute bottom-0 left-0 h-[1px] bg-rose-300 shadow-[0_0_15px_rgba(251,113,133,0.6)]"
+                            initial={{ width: "0%", left: "50%" }}
+                            animate={{
+                                width: isFocused || input.length > 0 ? "100%" : "0%",
+                                left: isFocused || input.length > 0 ? "0%" : "50%",
+                                opacity: isFocused ? 1 : 0.5
+                            }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
                         />
+
+                        {/* Ambient Glow behind the text when focused */}
+                        <motion.div
+                            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-4/5 h-8 bg-rose-500/20 blur-xl rounded-full -z-10"
+                            animate={{ opacity: isFocused ? 1 : 0 }}
+                            transition={{ duration: 0.5 }}
+                        />
+
                     </div>
                 </motion.form>
 
