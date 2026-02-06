@@ -58,43 +58,12 @@ export default function Gate() {
         }, 800);
     }, []);
 
-    // Play wavy success sound
+    // Play custom success sound from file
     const playSuccessSound = () => {
-        if (!audioContextRef.current) return;
-
-        const ctx = audioContextRef.current;
-        const now = ctx.currentTime;
-
-        // Create wavy, ascending sound
-        const frequencies = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-
-        frequencies.forEach((freq, index) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-
-            osc.frequency.value = freq;
-            osc.type = 'sine';
-
-            // Wavy effect with vibrato
-            const vibrato = ctx.createOscillator();
-            const vibratoGain = ctx.createGain();
-            vibrato.frequency.value = 6; // 6 Hz vibrato
-            vibratoGain.gain.value = 10;
-
-            vibrato.connect(vibratoGain);
-            vibratoGain.connect(osc.frequency);
-
-            gain.gain.setValueAtTime(0.2, now + index * 0.15);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.15 + 0.8);
-
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            vibrato.start(now + index * 0.15);
-            vibrato.stop(now + index * 0.15 + 0.8);
-            osc.start(now + index * 0.15);
-            osc.stop(now + index * 0.15 + 0.8);
-        });
+        // Play audio file from public/sounds folder
+        const audio = new Audio('/sounds/correct-answer.mp3');
+        audio.volume = 0.7; // Adjust volume (0.0 to 1.0)
+        audio.play().catch(err => console.log('Audio playback failed:', err));
     };
 
     // Initial Wipe & Entry Animation
@@ -139,7 +108,48 @@ export default function Gate() {
 
         if (input.toLowerCase().trim() === MAGIC_WORD.toLowerCase()) {
             // --- SUCCESS SEQUENCE ---
-            playSuccessSound(); // Play wavy success sound
+            playSuccessSound(); // Play custom success sound
+
+            // Create magical sparkles
+            const sparkleContainer = document.createElement('div');
+            sparkleContainer.style.cssText = 'position: fixed; inset: 0; z-index: 150; pointer-events: none;';
+            containerRef.current?.appendChild(sparkleContainer);
+
+            // Generate 50 sparkles
+            for (let i = 0; i < 50; i++) {
+                const sparkle = document.createElement('div');
+                const size = Math.random() * 8 + 4;
+                const startX = 50 + (Math.random() - 0.5) * 20; // Center with slight variation
+                const startY = 50 + (Math.random() - 0.5) * 20;
+                const endX = Math.random() * 100;
+                const endY = Math.random() * 100;
+
+                sparkle.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${startX}%;
+                    top: ${startY}%;
+                    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,200,255,0.8) 50%, transparent 100%);
+                    border-radius: 50%;
+                    box-shadow: 0 0 ${size * 2}px rgba(255,255,255,0.8), 0 0 ${size * 4}px rgba(255,200,255,0.4);
+                    pointer-events: none;
+                `;
+
+                sparkleContainer.appendChild(sparkle);
+
+                // Animate sparkle
+                gsap.to(sparkle, {
+                    left: `${endX}%`,
+                    top: `${endY}%`,
+                    opacity: 0,
+                    scale: 0,
+                    duration: 1.5 + Math.random() * 0.5,
+                    delay: Math.random() * 0.3,
+                    ease: "power2.out",
+                    onComplete: () => sparkle.remove()
+                });
+            }
 
             gsap.to(contentRef.current, {
                 scale: 1.03,
