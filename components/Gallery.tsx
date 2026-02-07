@@ -96,7 +96,7 @@ export default function Gallery() {
                 className="absolute top-10 z-20 flex items-center gap-2 text-white/40 text-xs md:text-sm font-mono tracking-widest uppercase mix-blend-screen"
             >
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                Hover frames to play
+                Hover frames to relive
             </motion.div>
 
             {/* --- CLASSIC MESSY ROW LAYOUT --- */}

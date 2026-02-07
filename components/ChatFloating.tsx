@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 const MESSAGES = [
     {
         id: 1,
-        title: "The Confession",
         segments: [
             "I meant to tell you this in person, but my ADHD mind keeps telling me we might not get that quiet moment before the year fully kicks off — so here it goes.\n\nI’ve really enjoyed getting to know you, and I love how calm things feel with you.",
             "I like how I feel when I’m with you, and how you stay on my mind even when you’re not around — especially the time we spend together.\n\nI’m sure it’s probably obvious that I like you. I love how being with you feels, and I don’t want to be casual about that — or about how I feel about you.",
@@ -19,7 +18,6 @@ const MESSAGES = [
     },
     {
         id: 2,
-        title: "The Reassurance",
         segments: [
             "I know I haven’t said this enough Times, and I really can’t help it. You really are my favorite person to talk to, and just the thought of you makes my whole day feel lighter. And sometimes I hate that you’re feeling so buried under work right now.",
             "But when I say ‘Mixxy you amaze me’ best believe I don’t say it lightly. It’s obvious you’re meant for such big, beautiful things, and I see how hard you’re pushing, even when it feels like the work never ends.",
@@ -31,7 +29,6 @@ const MESSAGES = [
     },
     {
         id: 3,
-        title: "The Punchline",
         segments: [
             "I dream of you everyday, I dream of being with you",
             "But then I start feeling something. A funny taste like beef. So I wake up and I find out I have been eating meat pie",
@@ -117,14 +114,7 @@ export default function ChatFloating() {
                             onClick={() => setActiveId(isActive ? null : msg.id)}
                             style={{ rotate: msg.baseRotation }} // Apply base rotation to the whole column group
                         >
-                            {/* Group Title Overlay (Visible when blurred) */}
-                            {!isActive && (
-                                <div className="absolute -top-10 left-0 right-0 text-center z-50">
-                                    <span className="bg-black/50 text-[#00a884] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-[#00a884]/30 backdrop-blur-md">
-                                        {msg.title}
-                                    </span>
-                                </div>
-                            )}
+                            {/* Group Title Overlay - REMOVED per user request */}
 
                             {/* Render Segments */}
                             {msg.segments.map((segment, i) => {
