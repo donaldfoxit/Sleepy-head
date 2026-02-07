@@ -4,11 +4,11 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const PHOTOS = [
-    { id: 1, src: "/photo1.png", date: "FEB 14 2024", caption: "Our First Date" },
-    { id: 2, src: "/photo2.png", date: "MAR 03 2024", caption: "Movie Night" },
-    { id: 3, src: "/photo3.png", date: "APR 21 2024", caption: "Paris Trip" },
-    { id: 4, src: "/photo4.png", date: "MAY 15 2024", caption: "Just Us" },
-    { id: 5, src: "/photo1.png", date: "JUN 10 2024", caption: "Summer Vibes" },
+    { id: 1, src: "/videos/reel/reel-1.mp4", type: "video", date: "FEB 14 2024", caption: "Our First Date" },
+    { id: 2, src: "/videos/reel/reel-2.mp4", type: "video", date: "MAR 03 2024", caption: "Beach Walk" },
+    { id: 3, src: "/videos/reel/reel-3.mp4", type: "video", date: "APR 21 2024", caption: "Paris Trip" },
+    { id: 4, src: "/videos/reel/reel-4.mp4", type: "video", date: "MAY 15 2024", caption: "Just Us" },
+    { id: 5, src: "/videos/reel/reel-5.mp4", type: "video", date: "JUN 10 2024", caption: "Summer Vibes" },
 ];
 
 export default function FilmReel() {
@@ -17,10 +17,12 @@ export default function FilmReel() {
         target: targetRef,
     });
 
-    const x = useTransform(scrollYProgress, [0, 1], ["1%", "-95%"]);
+    // Snappier scroll: stop horizontal move at the last frame
+    // Adjusted [0, 0.95] to include the new text frame
+    const x = useTransform(scrollYProgress, [0, 0.95], ["0%", "-82%"]);
 
     return (
-        <section ref={targetRef} className="relative h-[300vh] bg-neutral-900">
+        <section ref={targetRef} className="relative h-[250vh]">
             <div className="sticky top-0 h-screen flex items-center overflow-hidden">
 
                 {/* --- FILM STRIP CONTAINER --- */}
@@ -43,9 +45,20 @@ export default function FilmReel() {
                                 ))}
                             </div>
 
-                            {/* The Photo Frame */}
+                            {/* The Photo/Video Frame */}
                             <div className="relative w-full h-[85%] bg-black overflow-hidden border border-gray-800 rounded-sm">
-                                <img src={photo.src} alt={photo.caption} className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0" />
+                                {photo.type === "video" ? (
+                                    <video
+                                        src={photo.src}
+                                        autoPlay
+                                        muted
+                                        loop
+                                        playsInline
+                                        className="w-full h-full object-cover opacity-90 transition-opacity duration-500"
+                                    />
+                                ) : (
+                                    <img src={photo.src} alt={photo.caption} className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-500 grayscale hover:grayscale-0" />
+                                )}
 
                                 {/* Date Stamp */}
                                 <div className="absolute bottom-4 right-4 font-mono text-orange-500 text-xs tracking-widest opacity-80 backdrop-blur-sm px-2 py-1 bg-black/50 rounded">
@@ -60,6 +73,19 @@ export default function FilmReel() {
 
                         </div>
                     ))}
+
+                    {/* NEW: END TEXT FRAME - Shifted away from the reel strip */}
+                    <div className="relative flex-shrink-0 w-[1000px] h-[400px] flex items-center justify-center pl-60">
+                        <motion.h3
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 1.2, ease: "easeOut" }}
+                            className="text-6xl md:text-8xl font-black text-white tracking-tighter text-center uppercase whitespace-nowrap drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                        >
+                            and more to come?
+                        </motion.h3>
+                    </div>
+
                 </motion.div>
 
                 {/* Overlay Text */}

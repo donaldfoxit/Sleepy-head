@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, Star } from "lucide-react";
+import { ArrowDown } from "lucide-react";
+import RadioVisualizer from "@/components/RadioVisualizer";
 
 export default function Hero() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -20,117 +21,84 @@ export default function Hero() {
     return (
         <section
             ref={containerRef}
-            className="relative w-full h-screen overflow-hidden bg-black flex flex-col items-center justify-center"
+            className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center"
         >
-            {/* --- CINEMATIC BACKGROUND --- */}
-            <div className="absolute inset-0 z-0">
-                {/* 1. The Video */}
-                <video
-                    ref={videoRef}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-80"
-                >
-                    <source src="/169443-841382814_small.mp4" type="video/mp4" />
-                </video>
+            {/* --- CINEMATIC BACKGROUND (Dark Spotlight) --- */}
+            <div className="absolute inset-0 z-0 bg-[#0a0a0a]">
 
-                {/* 2. Dark Cinematic Vignette */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80" />
-                <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/60" />
+                {/* 1. The Spotlight (Top Center) */}
+                <div
+                    className="absolute inset-0 opacity-60 pointer-events-none"
+                    style={{
+                        background: "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.15) 0%, rgba(20,20,20,0) 60%)"
+                    }}
+                />
+
+                {/* 2. Atmospheric Fog/Glow (Bottom) */}
+                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black via-black/80 to-transparent opacity-80" />
 
                 {/* 3. Film Grain Overlay */}
-                {/* CSS-based noise texture */}
-                <div className="absolute inset-0 opacity-[0.08] pointer-events-none"
+                <div className="absolute inset-0 opacity-[0.12] pointer-events-none mix-blend-overlay"
                     style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
                 />
             </div>
 
-            {/* --- MAGAZINE LAYOUT CONTENT --- */}
+            {/* --- MAIN CONTENT --- */}
             <motion.div
                 style={{ y: yText, opacity: opacityText }}
-                className="relative z-10 w-full max-w-[90vw] h-full flex flex-col justify-between py-12 md:py-20 select-none"
+                className="relative z-10 w-full max-w-[95vw] h-full flex flex-col items-center justify-center py-12 select-none"
             >
 
-                {/* Top Section: Date & Location (Movie Poster Style) */}
-                <div className="flex justify-between items-start text-white/60 text-xs md:text-sm tracking-[0.2em] uppercase font-light mix-blend-difference">
-                    <div className="flex flex-col gap-1">
-                        <span>Est. 2024</span>
-                        <span>London, UK</span>
-                    </div>
-                    <div className="flex flex-col text-right gap-1">
-                        <span>Volume No. 1</span>
-                        <span>The Love Letter</span>
-                    </div>
-                </div>
+                {/* RADIO VISUALIZER (Floating Above) */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 1.2, delay: 0.5, type: "spring", bounce: 0.4 }}
+                    className="z-30 relative mb-8 md:mb-10"
+                >
+                    <RadioVisualizer />
+                </motion.div>
 
-                {/* Center Section: Main Title */}
-                <div className="flex flex-col items-center justify-center flex-grow">
+                {/* HORIZONTAL TYPOGRAPHY "My BABy" */}
+                <div className="flex items-baseline justify-center gap-4 md:gap-6 z-20 relative w-full px-4 text-center">
 
-                    {/* "To My" - Centered above Favorite */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                    {/* "My" */}
+                    <motion.span
+                        initial={{ opacity: 0, x: -30 }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className="mb-[-2vw] z-20"
+                        className="text-4xl md:text-6xl text-white mix-blend-overlay italic relative -top-3 md:-top-5 shrink-0"
+                        style={{ fontFamily: "var(--font-playfair), serif" }}
                     >
-                        <p className="font-serif italic text-2xl md:text-3xl text-white mix-blend-overlay">
-                            To My
-                        </p>
-                    </motion.div>
+                        My
+                    </motion.span>
 
-                    {/* "FAVORITE" - Huge, Bold, Serif */}
-                    <div className="relative">
-                        <motion.h1
-                            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                            transition={{ duration: 1.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className="text-[18vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tighter"
-                            style={{ fontFamily: "'Playfair Display', serif" }} // Assuming Google Font avail or fallback
-                        >
-                            FAVORITE
-                        </motion.h1>
-
-                        {/* Decorative Star */}
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            className="absolute top-[10%] right-[5%] text-white mix-blend-overlay"
-                        >
-                            <Star size={48} fill="white" />
-                        </motion.div>
-                    </div>
-
-                    {/* "PERSON" - Outline or Lighter Weight */}
+                    {/* "BABy" */}
                     <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1.5, delay: 0.8 }}
-                        className="text-[12vw] leading-[0.8] font-serif italic text-white/90 -mt-[2vw] mix-blend-overlay"
+                        initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                        transition={{ duration: 1.5, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                        className="text-[17vw] md:text-[21vw] leading-[0.8] font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tight mix-blend-overlay pb-2"
+                        style={{ fontFamily: "var(--font-playfair), serif" }}
                     >
-                        person
+                        BABy
                     </motion.h1>
-
-                </div>
-
-                {/* Bottom Section: Scroll Indicator */}
-                <div className="flex justify-center">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, y: [0, 10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
-                        className="flex flex-col items-center gap-2 text-white/50"
-                    >
-                        <span className="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-                        <ArrowDown size={16} />
-                    </motion.div>
                 </div>
 
             </motion.div>
 
+            {/* --- SCROLL INDICATOR --- */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, y: [0, 10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 2 }}
+                className="absolute bottom-12 text-white/40 flex flex-col items-center gap-2"
+            >
+                <span className="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+                <ArrowDown size={16} />
+            </motion.div>
+
             {/* --- OVERLAY TEXTURE --- */}
-            {/* A subtle texture to unify everything */}
             <div className="absolute inset-0 pointer-events-none z-20 mix-blend-soft-light opacity-30"
                 style={{ background: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}
             />

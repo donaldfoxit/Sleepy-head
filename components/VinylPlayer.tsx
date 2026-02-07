@@ -74,7 +74,7 @@ export default function VinylPlayer() {
 
                 {/* TRACK INFO */}
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold tracking-tight mb-2">My Favorite Part</h2>
+                    <h2 className="text-3xl italic tracking-tight mb-2" style={{ fontFamily: "var(--font-bodoni), serif" }}>My Favorite Part</h2>
                     <p className="text-rose-400 font-medium tracking-wide">Mac Miller ft. Ariana Grande</p>
                 </div>
 

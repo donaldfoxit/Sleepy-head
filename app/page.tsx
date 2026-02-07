@@ -7,15 +7,19 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Hero from "@/components/Hero";
 import Gallery from "@/components/Gallery";
 import FilmReel from "@/components/FilmReel";
-import LoveLetter from "@/components/LoveLetter";
+import Letter from "@/components/Letter";
 import VinylPlayer from "@/components/VinylPlayer";
+import Stargazer from "@/components/Stargazer";
+import Manifesto from "@/components/Manifesto";
+import WallArt from "@/components/WallArt";
 
 export default function Home() {
     const isUnlocked = useStore((state) => state.isUnlocked);
     const [loadingComplete, setLoadingComplete] = useState(false);
+    const [isStargazerComplete, setStargazerComplete] = useState(false); // Tracks constellation completion
 
     return (
-        <main className="relative min-h-screen bg-black">
+        <main className="relative min-h-screen bg-[#050505] text-white overflow-x-hidden">
             {/* Loading Screen */}
             {!loadingComplete && (
                 <LoadingScreen onComplete={() => setLoadingComplete(true)} />
@@ -35,16 +39,30 @@ export default function Home() {
 
                     {/* --- PROPOSAL SECTIONS (FOR REVIEW) --- */}
 
-                    {/* Option A: Timeline */}
-                    <FilmReel />
 
-                    {/* Option B: Letter */}
-                    <LoveLetter />
+                    {/* Bridge: The Manifesto (No longer gates content) */}
+                    <Manifesto onComplete={() => setStargazerComplete(true)} />
 
-                    {/* Option C: Vinyl */}
-                    <VinylPlayer />
+                    {/* REVEALED CONTENT (Always Visible for Free Scroll) */}
+                    <div className="animate-fadeIn transition-opacity duration-1000">
+                        {/* Option A: Timeline */}
+                        <FilmReel />
+
+                        {/* Option B: Letter (Unified Experience) */}
+                        <Letter />
+
+                        {/* Option C: Vinyl & Soundtrack */}
+                        <VinylPlayer />
+
+                        {/* Final Wall Art Mashup */}
+                        <WallArt />
+                    </div>
                 </div>
             )}
+            {/* --- GLOBAL FILM GRAIN OVERLAY --- */}
+            <div className="fixed inset-0 z-50 pointer-events-none opacity-[0.08] mix-blend-overlay"
+                style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
+            />
         </main>
     );
 }

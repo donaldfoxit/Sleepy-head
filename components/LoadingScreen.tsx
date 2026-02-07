@@ -152,7 +152,6 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                                 >
                                     <Heart
                                         size={64}
-                                        weight="fill" // Lucide doesn't have weight, but we fill it
                                         className="text-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)] fill-rose-500"
                                     />
 
@@ -203,15 +202,15 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                             className="flex flex-col items-center"
                         >
                             {/* Stylized Loading Typography */}
-                            <h2 className="text-3xl md:text-5xl font-serif italic text-white/90 mb-8 tracking-wide">
+                            <h2 className="text-3xl md:text-5xl italic text-white/90 mb-8 tracking-wide text-center px-4" style={{ fontFamily: "var(--font-bodoni), serif" }}>
                                 {displayText}
-                                <span className="animate-pulse text-rose-500">_</span>
+                                <span className="animate-pulse text-amber-500">_</span>
                             </h2>
 
                             {/* Minimal Line Progress */}
                             <div className="w-64 h-[1px] bg-white/10 relative overflow-hidden">
                                 <motion.div
-                                    className="absolute inset-y-0 left-0 bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]"
+                                    className="absolute inset-y-0 left-0 bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]"
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
