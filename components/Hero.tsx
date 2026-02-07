@@ -42,6 +42,61 @@ export default function Hero() {
                     style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
                 />
             </div>
+            {/* --- PAINTED MEMORIES (Hanging from "Strings") --- */}
+
+            {/* Memory 1: Top Right (The Panda) - Hanging */}
+            <motion.div
+                initial={{ opacity: 0, rotate: 5, y: -100 }}
+                animate={{
+                    opacity: 1,
+                    rotate: [5, 3, 5], // Gentle pendulum swing
+                    y: 0,
+                }}
+                transition={{
+                    opacity: { duration: 1, delay: 1 },
+                    rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                    y: { duration: 1.5, type: "spring", bounce: 0.5, delay: 0.5 }
+                }}
+                className="absolute top-[-5%] right-[2%] md:right-[5%] z-20 w-36 md:w-48 origin-top cursor-pointer hidden md:block"
+                style={{ transformOrigin: "top center" }}
+            >
+                {/* The String */}
+                <div className="absolute -top-[100vh] left-1/2 -translate-x-1/2 w-[1px] h-[100vh] bg-white/30" />
+
+                {/* The Photo */}
+                <div className="relative p-2 bg-white/95 backdrop-blur-sm rounded-sm shadow-2xl transform rotate-2 hover:scale-105 hover:rotate-0 transition-all duration-500 grayscale-[0.2] hover:grayscale-0">
+                    {/* Tape/Pin Graphic */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-8 bg-rose-500/80 blur-[1px] rounded-sm opacity-80" />
+                    <img src="/memories/regenerated-panda.png" alt="Painted Panda Memory" className="w-full h-auto rounded-sm opacity-95" />
+                </div>
+            </motion.div>
+
+            {/* Memory 2: Top Left (The Party Character) - Hanging */}
+            <motion.div
+                initial={{ opacity: 0, rotate: -5, y: -100 }}
+                animate={{
+                    opacity: 1,
+                    rotate: [-5, -3, -5], // Gentle pendulum swing
+                    y: 0,
+                }}
+                transition={{
+                    opacity: { duration: 1, delay: 1.2 },
+                    rotate: { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 },
+                    y: { duration: 1.8, type: "spring", bounce: 0.5, delay: 0.7 }
+                }}
+                className="absolute top-[5%] left-[2%] md:left-[5%] z-20 w-40 md:w-52 origin-top cursor-pointer hidden md:block"
+                style={{ transformOrigin: "top center" }}
+            >
+                {/* The String */}
+                <div className="absolute -top-[100vh] left-1/2 -translate-x-1/2 w-[1px] h-[100vh] bg-white/30" />
+
+                {/* The Photo */}
+                <div className="relative p-2 bg-white/95 backdrop-blur-sm rounded-sm shadow-2xl transform -rotate-1 hover:scale-105 hover:rotate-0 transition-all duration-500 grayscale-[0.2] hover:grayscale-0">
+                    {/* Tape/Pin Graphic */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-8 bg-indigo-500/80 blur-[1px] rounded-sm opacity-80" />
+                    <img src="/memories/regenerated-character.png" alt="Painted Character Memory" className="w-full h-auto rounded-sm opacity-95" />
+                </div>
+            </motion.div>
 
             {/* --- MAIN CONTENT --- */}
             <motion.div
@@ -59,30 +114,46 @@ export default function Hero() {
                     <RadioVisualizer />
                 </motion.div>
 
-                {/* HORIZONTAL TYPOGRAPHY "My BABy" */}
-                <div className="flex items-baseline justify-center gap-4 md:gap-6 z-20 relative w-full px-4 text-center">
+                {/* HORIZONTAL TYPOGRAPHY - "To My BABy" LAYOUT */}
+                <div className="flex flex-col items-center justify-center relative z-20 w-full px-4 text-center mt-4 md:mt-0">
 
-                    {/* "My" */}
-                    <motion.span
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
+                    {/* "To My" */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, delay: 0.2 }}
-                        className="text-4xl md:text-6xl text-white mix-blend-overlay italic relative -top-3 md:-top-5 shrink-0"
-                        style={{ fontFamily: "var(--font-playfair), serif" }}
+                        className="mb-[-2vw] md:mb-[-1vw] z-10"
                     >
-                        My
-                    </motion.span>
+                        <p className="font-serif italic text-3xl md:text-5xl text-white mix-blend-overlay" style={{ fontFamily: "var(--font-playfair), serif" }}>
+                            To My
+                        </p>
+                    </motion.div>
 
                     {/* "BABy" */}
-                    <motion.h1
-                        initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                        transition={{ duration: 1.5, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                        className="text-[17vw] md:text-[21vw] leading-[0.8] font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 tracking-tight mix-blend-overlay pb-2"
-                        style={{ fontFamily: "var(--font-playfair), serif" }}
-                    >
-                        BABy
-                    </motion.h1>
+                    <div className="relative">
+                        <motion.h1
+                            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                            transition={{ duration: 1.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tighter"
+                            style={{ fontFamily: "var(--font-playfair), serif" }}
+                        >
+                            BABy
+                        </motion.h1>
+
+                        {/* Star Decoration */}
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute -top-4 -right-4 md:top-[15%] md:right-[-5%] text-white/80 mix-blend-overlay"
+                        >
+                            {/* Simple Star Icon */}
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 md:w-20 md:h-20">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                        </motion.div>
+                    </div>
+
                 </div>
 
             </motion.div>

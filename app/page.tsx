@@ -11,7 +11,13 @@ import Letter from "@/components/Letter";
 import VinylPlayer from "@/components/VinylPlayer";
 import Stargazer from "@/components/Stargazer";
 import Manifesto from "@/components/Manifesto";
+import FlankingBanners from "@/components/FlankingBanners";
+import ChatFloating from "@/components/ChatFloating";
+import ConnectFour from "@/components/ConnectFour";
 import WallArt from "@/components/WallArt";
+import BackgroundMusic from "@/components/BackgroundMusic";
+import NicknameScreen from "@/components/NicknameScreen";
+import MobileRestriction from "@/components/MobileRestriction";
 
 export default function Home() {
     const isUnlocked = useStore((state) => state.isUnlocked);
@@ -19,7 +25,11 @@ export default function Home() {
     const [isStargazerComplete, setStargazerComplete] = useState(false); // Tracks constellation completion
 
     return (
-        <main className="relative min-h-screen bg-[#050505] text-white overflow-x-hidden">
+        <main className="relative min-h-screen w-full bg-black overflow-x-hidden">
+
+            {/* --- MOBILE RESTRICTION OVERLAY --- */}
+            <MobileRestriction />
+
             {/* Loading Screen */}
             {!loadingComplete && (
                 <LoadingScreen onComplete={() => setLoadingComplete(true)} />
@@ -43,9 +53,20 @@ export default function Home() {
                     {/* Bridge: The Manifesto (No longer gates content) */}
                     <Manifesto onComplete={() => setStargazerComplete(true)} />
 
+                    {/* NEW SECTION: Flanking Banners (Testimonial Style) */}
+                    <FlankingBanners />
+
+                    {/* NEW SECTION: Floating Chat Messages */}
+                    <ChatFloating />
+
+                    <NicknameScreen />
+
+                    {/* NEW SECTION: Connect 4 (Almost Won) */}
+                    <ConnectFour />
+
                     {/* REVEALED CONTENT (Always Visible for Free Scroll) */}
                     <div className="animate-fadeIn transition-opacity duration-1000">
-                        {/* Option A: Timeline */}
+                        {/* Option A: Timeline (Horizontal Scroll) */}
                         <FilmReel />
 
                         {/* Option B: Letter (Unified Experience) */}
@@ -54,8 +75,8 @@ export default function Home() {
                         {/* Option C: Vinyl & Soundtrack */}
                         <VinylPlayer />
 
-                        {/* Final Wall Art Mashup */}
-                        <WallArt />
+                        {/* Final Wall Art Mashup - REMOVED */}
+                        {/* <WallArt /> */}
                     </div>
                 </div>
             )}
@@ -63,6 +84,9 @@ export default function Home() {
             <div className="fixed inset-0 z-50 pointer-events-none opacity-[0.08] mix-blend-overlay"
                 style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
             />
+
+            {/* --- BACKGROUND MUSIC PLAYER (Unlocks with Site - Controlled internally) --- */}
+            <BackgroundMusic />
         </main>
     );
 }

@@ -10,7 +10,8 @@ const MEMORIES = [
         id: 1,
         src: "/videos/memories/memory-1.mp4",
         type: "video",
-        caption: "The day you said yes",
+        caption: "My Fashionista",
+        captionStyle: "top-1/2 -translate-y-1/2 left-[-40px] rotate-[-15deg] z-50",
         tagColor: "bg-purple-200/90 text-purple-900 border-purple-300 backdrop-blur-sm",
         rotation: -4,
         yOffset: 20,
@@ -19,7 +20,8 @@ const MEMORIES = [
         id: 2,
         src: "/videos/memories/memory-2.mov",
         type: "video",
-        caption: "We look good together",
+        caption: "Fan girl",
+        captionStyle: "top-[-30px] left-[-15px] rotate-[-12deg] z-50",
         tagColor: "bg-orange-200/90 text-orange-900 border-orange-300 backdrop-blur-sm",
         rotation: 3,
         yOffset: -20,
@@ -28,7 +30,8 @@ const MEMORIES = [
         id: 3,
         src: "/videos/memories/memory-3.mov",
         type: "video",
-        caption: "Golden moments",
+        caption: "santa's cutie putiti",
+        captionStyle: "bottom-[-25px] left-1/2 -translate-x-1/2 rotate-[3deg] z-50",
         tagColor: "bg-lime-200/90 text-lime-900 border-lime-300 backdrop-blur-sm",
         rotation: -3,
         yOffset: 30,
@@ -38,6 +41,7 @@ const MEMORIES = [
         src: "/videos/memories/memory-4.mov",
         type: "video",
         caption: "My favorite view",
+        captionStyle: "top-[-15px] right-[-20px] rotate-[6deg] z-50",
         tagColor: "bg-rose-200/90 text-rose-900 border-rose-300 backdrop-blur-sm",
         rotation: 5,
         yOffset: -10,
@@ -84,8 +88,19 @@ export default function Gallery() {
                 style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}
             />
 
+            {/* --- INTERACTION GUIDE --- */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 1 }}
+                className="absolute top-10 z-20 flex items-center gap-2 text-white/40 text-xs md:text-sm font-mono tracking-widest uppercase mix-blend-screen"
+            >
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                Hover frames to play
+            </motion.div>
+
             {/* --- CLASSIC MESSY ROW LAYOUT --- */}
-            <div className="relative z-10 w-full max-w-[95vw] px-4 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-0 md:-space-x-12 mb-20 md:mb-28 mt-10">
+            <div className="relative z-10 w-full max-w-[95vw] px-4 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-0 md:-space-x-12 mb-20 md:mb-28 mt-24 md:mt-20">
                 {MEMORIES.map((memory) => (
                     <MemoryFrame key={memory.id} memory={memory} />
                 ))}
@@ -97,7 +112,7 @@ export default function Gallery() {
                     className="text-2xl md:text-4xl text-white/80 italic leading-relaxed mb-12 tracking-wide drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                     style={{ fontFamily: "var(--font-bodoni), serif" }}
                 >
-                    "Every little moment I managed to capture made me know I wanted you from the first day"
+                    "Every little moment I managed to capture or steal was a moment cherished beyond"
                 </p>
 
                 {/* Bouncing Arrow */}
@@ -139,8 +154,8 @@ function MemoryFrame({ memory }: { memory: any }) {
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className="relative group cursor-pointer shrink-0"
         >
-            {/* Minimal Dark Border for a "Pressed Photo" Look */}
-            <div className="relative w-[340px] md:w-[420px] aspect-[4/5] p-2 bg-[#0a0a0a] rounded-xl shadow-[0_30px_70px_rgba(0,0,0,0.8)] border border-white/10 flex flex-col items-center transition-all group-hover:border-rose-400/30">
+            {/* Frameless Video Container */}
+            <div className="relative w-[280px] md:w-[350px] aspect-[4/5] rounded-xl overflow-hidden shadow-2xl transition-all">
 
                 {/* Video Container */}
                 <div className="w-full h-full bg-black overflow-hidden relative rounded-lg">
@@ -157,21 +172,24 @@ function MemoryFrame({ memory }: { memory: any }) {
 
                     {/* Gloss Reflection */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                    {/* OVERLAY CAPTION - Simplified Translucent Style */}
-                    <div className="absolute bottom-8 left-0 right-0 flex justify-center z-10 px-6 text-center">
-                        <motion.p
-                            initial={{ y: 20, opacity: 0 }}
-                            whileInView={{ y: 0, opacity: 1 }}
-                            transition={{ duration: 0.8 }}
-                            className="italic text-lg md:text-xl text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)] tracking-wide"
-                            style={{ fontFamily: "var(--font-bodoni), serif" }}
-                        >
-                            {memory.caption}
-                        </motion.p>
-                    </div>
                 </div>
             </div>
+
+            {/* --- INDEPENDENT MESSY STICKER/TAG (Independent Interaction) --- */}
+            <motion.div
+                className={`absolute pointer-events-auto cursor-default ${memory.captionStyle}`}
+                whileHover={{ scale: 1.1, rotate: 0, zIndex: 60 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+                <div className={`px-4 py-1.5 rounded-full border shadow-[0_4px_12px_rgba(0,0,0,0.3)] ${memory.tagColor}`}>
+                    <p
+                        className="text-sm md:text-base font-bold tracking-wide whitespace-nowrap"
+                        style={{ fontFamily: "var(--font-bodoni), serif" }}
+                    >
+                        {memory.caption}
+                    </p>
+                </div>
+            </motion.div>
         </motion.div>
     );
 }
