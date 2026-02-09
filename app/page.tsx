@@ -14,10 +14,10 @@ import Manifesto from "@/components/Manifesto";
 import FlankingBanners from "@/components/FlankingBanners";
 import ChatFloating from "@/components/ChatFloating";
 import ConnectFour from "@/components/ConnectFour";
-import WallArt from "@/components/WallArt";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import NicknameScreen from "@/components/NicknameScreen";
 import MobileRestriction from "@/components/MobileRestriction";
+import SolarEclipse from "@/components/SolarEclipse";
 
 export default function Home() {
     const isUnlocked = useStore((state) => state.isUnlocked);
@@ -69,6 +69,11 @@ export default function Home() {
 
                     {/* 8. LETTER (The Finale - Emotional Climax) */}
                     <Letter />
+
+
+                    {/* 9. THE PROPOSAL (The Grand Finale) - "The Solar Eclipse" */}
+                    <SolarEclipse />
+
 
                     {/* REMOVED: FlankingBanners (Testimonial overlap), WallArt (Redundant), VinylPlayer (Integrated music) */}
                     <VinylPlayer /> {/* Keeping Vinyl Player logic if needed, or is it visual? It was hidden/optional before but kept in list. Checking... It renders a player. The user list said "Option C: Vinyl". Let's keep it at the end or remove based on "Video/Music" updates. User checklist said "Keep Letter & Vinyl active". Use Vinyl as footer control?

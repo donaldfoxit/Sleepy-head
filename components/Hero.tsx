@@ -135,8 +135,8 @@ export default function Hero() {
                             initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
                             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                             transition={{ duration: 1.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className="text-[25vw] leading-[0.8] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tighter"
-                            style={{ fontFamily: "var(--font-playfair), serif" }}
+                            className="text-[25vw] leading-[1.15] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tighter pb-[4vw] px-[5vw] w-full text-center"
+                            style={{ fontFamily: "var(--font-playfair), serif", overflow: "visible" }}
                         >
                             BABy
                         </motion.h1>
