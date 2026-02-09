@@ -41,43 +41,39 @@ export default function Home() {
             {/* Main Content */}
             {isUnlocked && (
                 <div className="transition-opacity duration-1000 animate-fadeIn">
-                    {/* Hero Manifesto Section */}
+                    {/* 1. HERO (The Hook) */}
                     <Hero />
 
-                    {/* Gallery Section */}
+                    {/* 2. GALLERY (The Vibe - "Messy Sticker" Videos) */}
                     <Gallery />
 
-                    {/* --- PROPOSAL SECTIONS (FOR REVIEW) --- */}
-
-
+                    {/* 3. MANIFESTO (The Poetry - Deep Romance) */}
                     {/* Bridge: The Manifesto (No longer gates content) */}
                     <Manifesto onComplete={() => setStargazerComplete(true)} />
 
-                    {/* NEW SECTION: Flanking Banners (Testimonial Style) */}
+                    {/* RESTORED: Flanking Banners (Testimonial Style) */}
                     <FlankingBanners />
 
-                    {/* NEW SECTION: Floating Chat Messages */}
-                    <ChatFloating />
-
-                    <NicknameScreen />
-
-                    {/* NEW SECTION: Connect 4 (Almost Won) */}
+                    {/* 4. CONNECT FOUR (The Game - "Redemption" / Intermission) */}
+                    {/* Breaks up the reading sections */}
                     <ConnectFour />
 
-                    {/* REVEALED CONTENT (Always Visible for Free Scroll) */}
-                    <div className="animate-fadeIn transition-opacity duration-1000">
-                        {/* Option A: Timeline (Horizontal Scroll) */}
-                        <FilmReel />
+                    {/* 5. CHAT MESSAGES (The Reality - "Receipts") */}
+                    <ChatFloating />
 
-                        {/* Option B: Letter (Unified Experience) */}
-                        <Letter />
+                    {/* 6. NICKNAME NOTE (The Secret - Intimate) */}
+                    <NicknameScreen />
 
-                        {/* Option C: Vinyl & Soundtrack */}
-                        <VinylPlayer />
+                    {/* 7. FILM REEL (The History - Timeline) */}
+                    <FilmReel />
 
-                        {/* Final Wall Art Mashup - REMOVED */}
-                        {/* <WallArt /> */}
-                    </div>
+                    {/* 8. LETTER (The Finale - Emotional Climax) */}
+                    <Letter />
+
+                    {/* REMOVED: FlankingBanners (Testimonial overlap), WallArt (Redundant), VinylPlayer (Integrated music) */}
+                    <VinylPlayer /> {/* Keeping Vinyl Player logic if needed, or is it visual? It was hidden/optional before but kept in list. Checking... It renders a player. The user list said "Option C: Vinyl". Let's keep it at the end or remove based on "Video/Music" updates. User checklist said "Keep Letter & Vinyl active". Use Vinyl as footer control?
+                    Actually, VinylPlayer is likely the visual player interface. Let's keep it at the end as a footer element if it fits, or just leave it where it was relative to Letter.
+                    Original order had Vinyl after Letter. I'll keep it there. */}
                 </div>
             )}
             {/* --- GLOBAL FILM GRAIN OVERLAY --- */}
