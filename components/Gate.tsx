@@ -27,6 +27,42 @@ export default function Gate() {
             // --- SUCCESS SEQUENCE ---
             playSuccessSound();
 
+            // 0. VISUAL EXPLOSION (Sparkles)
+            // Create a burst of particles from the center
+            const centerParams = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 200 + 50;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${centerParams.x}px;
+                    top: ${centerParams.y}px;
+                    width: ${Math.random() * 8 + 4}px;
+                    height: ${Math.random() * 8 + 4}px;
+                    background: ${Math.random() > 0.5 ? '#f43f5e' : '#fff'};
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 10000;
+                    box-shadow: 0 0 10px rgba(244,63,94,0.8);
+                `;
+                document.body.appendChild(particle);
+
+                // Animate Particle
+                gsap.to(particle, {
+                    x: tx,
+                    y: ty,
+                    opacity: 0,
+                    scale: 0,
+                    duration: 1 + Math.random(),
+                    ease: "power2.out",
+                    onComplete: () => particle.remove()
+                });
+            }
+
             // 1. Create the Brush Overlay Container
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position: fixed; inset: 0; z-index: 9999; pointer-events: none; transform: translateX(-120%); display: flex; align-items: stretch;';
