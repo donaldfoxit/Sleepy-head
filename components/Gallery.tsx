@@ -96,7 +96,7 @@ export default function Gallery() {
                 className="absolute top-10 z-20 flex items-center gap-2 text-white/40 text-xs md:text-sm font-mono tracking-widest uppercase mix-blend-screen"
             >
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                Hover frames to relive
+                Reliving memories...
             </motion.div>
 
             {/* --- CLASSIC MESSY ROW LAYOUT --- */}
@@ -112,7 +112,7 @@ export default function Gallery() {
                     className="text-2xl md:text-4xl text-white/80 italic leading-relaxed mb-12 tracking-wide drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                     style={{ fontFamily: "var(--font-bodoni), serif" }}
                 >
-                    "Every little moment I managed to capture or steal was a moment cherished beyond"
+                    &quot;Every little moment I managed to capture or steal was a moment cherished beyond&quot;
                 </p>
 
                 {/* Bouncing Arrow */}
@@ -133,24 +133,12 @@ export default function Gallery() {
 function MemoryFrame({ memory }: { memory: any }) {
     const videoRef = React.useRef<HTMLVideoElement>(null);
 
-    const handleMouseEnter = () => {
-        if (videoRef.current) {
-            videoRef.current.play().catch(() => { });
-        }
-    };
-
-    const handleMouseLeave = () => {
-        if (videoRef.current) {
-            videoRef.current.pause();
-        }
-    };
+    // Auto-play ensured by attributes, no hover logic needed for playback
 
     return (
         <motion.div
             initial={{ rotate: memory.rotation, y: memory.yOffset }}
             whileHover={{ scale: 1.15, rotate: 0, y: 0, zIndex: 100 }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className="relative group cursor-pointer shrink-0"
         >
@@ -161,10 +149,10 @@ function MemoryFrame({ memory }: { memory: any }) {
                 <div className="w-full h-full bg-black overflow-hidden relative rounded-lg">
                     <video
                         ref={videoRef}
+                        autoPlay
                         muted
                         loop
                         playsInline
-                        preload="auto"
                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                     >
                         <source src={memory.src} type={memory.src.endsWith('.mov') ? 'video/quicktime' : 'video/mp4'} />

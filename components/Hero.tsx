@@ -57,7 +57,7 @@ export default function Hero() {
                     rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" },
                     y: { duration: 1.5, type: "spring", bounce: 0.5, delay: 0.5 }
                 }}
-                className="absolute top-[-5%] right-[2%] md:right-[5%] z-20 w-36 md:w-48 origin-top cursor-pointer hidden md:block"
+                className="absolute top-[-5%] right-[2%] md:right-[5%] z-20 w-36 md:w-48 origin-top cursor-pointer hidden md:block" // Use z-20 to be behind/contextual
                 style={{ transformOrigin: "top center" }}
             >
                 {/* The String */}
@@ -84,7 +84,7 @@ export default function Hero() {
                     rotate: { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 },
                     y: { duration: 1.8, type: "spring", bounce: 0.5, delay: 0.7 }
                 }}
-                className="absolute top-[5%] left-[2%] md:left-[5%] z-20 w-40 md:w-52 origin-top cursor-pointer hidden md:block"
+                className="absolute top-[5%] left-[2%] md:left-[5%] z-20 w-40 md:w-52 origin-top cursor-pointer hidden md:block" // Use z-20
                 style={{ transformOrigin: "top center" }}
             >
                 {/* The String */}
@@ -101,19 +101,21 @@ export default function Hero() {
             {/* --- MAIN CONTENT --- */}
             <motion.div
                 style={{ y: yText, opacity: opacityText }}
-                className="relative z-10 w-full max-w-[95vw] h-full flex flex-col items-center justify-center py-12 select-none"
+                className="relative z-10 w-full max-w-[95vw] h-full flex flex-col items-center justify-center pt-32 md:pt-48 pb-12 select-none"
             >
+
+
+
 
                 {/* RADIO VISUALIZER (Floating Above) */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 30 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 1.2, delay: 0.5, type: "spring", bounce: 0.4 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 2, delay: 0.5 }}
                     className="z-30 relative mb-8 md:mb-10"
                 >
                     <RadioVisualizer />
                 </motion.div>
-
                 {/* HORIZONTAL TYPOGRAPHY - "To My BABy" LAYOUT */}
                 <div className="flex flex-col items-center justify-center relative z-20 w-full px-4 text-center mt-4 md:mt-0">
 
@@ -131,6 +133,35 @@ export default function Hero() {
 
                     {/* "BABy" */}
                     <div className="relative">
+                        {/* --- MAGICAL SPARKLES (Text Aura) --- */}
+                        <div className="absolute inset-0 pointer-events-none">
+                            {[...Array(40)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    className="absolute bg-rose-300 rounded-full opacity-0"
+                                    style={{
+                                        width: Math.random() * 6 + 2 + "px", // Slightly larger for the big text
+                                        height: Math.random() * 6 + 2 + "px",
+                                        top: Math.random() * 120 - 10 + "%", // Scatter a bit outside
+                                        left: Math.random() * 120 - 10 + "%",
+                                        boxShadow: "0 0 15px rgba(244, 63, 94, 0.6)"
+                                    }}
+                                    animate={{
+                                        opacity: [0, 0.8, 0],
+                                        scale: [0, 1.5, 0],
+                                        y: -40,
+                                        rotate: [0, 180]
+                                    }}
+                                    transition={{
+                                        duration: Math.random() * 4 + 2,
+                                        repeat: Infinity,
+                                        delay: Math.random() * 2,
+                                        ease: "easeInOut",
+                                    }}
+                                />
+                            ))}
+                        </div>
+
                         <motion.h1
                             initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
                             animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
@@ -145,7 +176,7 @@ export default function Hero() {
                         <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            className="absolute -top-4 -right-4 md:top-[15%] md:right-[-5%] text-white/80 mix-blend-overlay"
+                            className="absolute -top-4 -right-4 md:top-[15%] md:right-[-5%] text-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" // Pink Star
                         >
                             {/* Simple Star Icon */}
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 md:w-20 md:h-20">

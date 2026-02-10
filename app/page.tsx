@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/store/useStore";
 import Gate from "@/components/Gate";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -8,19 +9,21 @@ import Hero from "@/components/Hero";
 import Gallery from "@/components/Gallery";
 import FilmReel from "@/components/FilmReel";
 import Letter from "@/components/Letter";
-import VinylPlayer from "@/components/VinylPlayer";
+import SpotifyScanner from "@/components/SpotifyScanner";
 import Stargazer from "@/components/Stargazer";
 import Manifesto from "@/components/Manifesto";
 import FlankingBanners from "@/components/FlankingBanners";
 import ChatFloating from "@/components/ChatFloating";
 import ConnectFour from "@/components/ConnectFour";
+import StartScreen from "@/components/StartScreen";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import NicknameScreen from "@/components/NicknameScreen";
 import MobileRestriction from "@/components/MobileRestriction";
-import SolarEclipse from "@/components/SolarEclipse";
+import QuantumTouch from "@/components/QuantumTouch";
 
 export default function Home() {
     const isUnlocked = useStore((state) => state.isUnlocked);
+    const [startInteraction, setStartInteraction] = useState(false);
     const [loadingComplete, setLoadingComplete] = useState(false);
     const [isStargazerComplete, setStargazerComplete] = useState(false); // Tracks constellation completion
 
@@ -30,17 +33,29 @@ export default function Home() {
             {/* --- MOBILE RESTRICTION OVERLAY --- */}
             <MobileRestriction />
 
-            {/* Loading Screen */}
-            {!loadingComplete && (
-                <LoadingScreen onComplete={() => setLoadingComplete(true)} />
-            )}
+            <AnimatePresence mode="wait">
+                {/* 0. Start Screen (Heart Button) */}
+                {!startInteraction && (
+                    <StartScreen key="start-screen" onStart={() => setStartInteraction(true)} />
+                )}
+
+                {/* Loading Screen */}
+                {startInteraction && !loadingComplete && (
+                    <LoadingScreen key="loading-screen" onComplete={() => setLoadingComplete(true)} />
+                )}
+            </AnimatePresence>
 
             {/* Password Gate */}
             {loadingComplete && !isUnlocked && <Gate />}
 
             {/* Main Content */}
             {isUnlocked && (
-                <div className="transition-opacity duration-1000 animate-fadeIn">
+                <motion.div
+                    className="relative z-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
                     {/* 1. HERO (The Hook) */}
                     <Hero />
 
@@ -51,7 +66,7 @@ export default function Home() {
                     {/* Bridge: The Manifesto (No longer gates content) */}
                     <Manifesto onComplete={() => setStargazerComplete(true)} />
 
-                    {/* RESTORED: Flanking Banners (Testimonial Style) */}
+                    {/* RESTORED: FlankingBanners (Testimonial Style) */}
                     <FlankingBanners />
 
                     {/* 4. CONNECT FOUR (The Game - "Redemption" / Intermission) */}
@@ -71,23 +86,21 @@ export default function Home() {
                     <Letter />
 
 
-                    {/* 9. THE PROPOSAL (The Grand Finale) - "The Solar Eclipse" */}
-                    <SolarEclipse />
+                    {/* 9. THE PROPOSAL (The Grand Finale) - "The Quantum Touch" */}
+                    <QuantumTouch />
 
-
-                    {/* REMOVED: FlankingBanners (Testimonial overlap), WallArt (Redundant), VinylPlayer (Integrated music) */}
-                    <VinylPlayer /> {/* Keeping Vinyl Player logic if needed, or is it visual? It was hidden/optional before but kept in list. Checking... It renders a player. The user list said "Option C: Vinyl". Let's keep it at the end or remove based on "Video/Music" updates. User checklist said "Keep Letter & Vinyl active". Use Vinyl as footer control?
-                    Actually, VinylPlayer is likely the visual player interface. Let's keep it at the end as a footer element if it fits, or just leave it where it was relative to Letter.
-                    Original order had Vinyl after Letter. I'll keep it there. */}
-                </div>
+                    {/* 10. SPOTIFY SCANNER (The Soundtrack) */}
+                    <SpotifyScanner />
+                </motion.div>
             )}
             {/* --- GLOBAL FILM GRAIN OVERLAY --- */}
             <div className="fixed inset-0 z-50 pointer-events-none opacity-[0.08] mix-blend-overlay"
                 style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
             />
 
-            {/* --- BACKGROUND MUSIC PLAYER (Unlocks with Site - Controlled internally) --- */}
-            <BackgroundMusic />
+            {/* --- BACKGROUND MUSIC PLAYER (Unlocks with Start Interaction) --- */}
+            {/* Now plays as soon as user clicks the Heart button */}
+            <BackgroundMusic shouldPlay={startInteraction} />
         </main>
     );
 }

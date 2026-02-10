@@ -11,10 +11,12 @@ export default function FlankingBanners() {
             <motion.div
                 initial={{ x: -100, opacity: 0, rotate: -5 }}
                 whileInView={{ x: 0, opacity: 1, rotate: 3 }}
-                transition={{ duration: 1, ease: "easeOut" }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }} // "Buttery" (Bezier for easeOutQuart-ish)
+                style={{ willChange: "transform, opacity" }}
                 className="absolute left-[-5%] md:left-0 top-[10%] md:top-auto h-[50vh] md:h-[80vh] w-[40vw] md:w-[25vw] z-10 hidden md:block"
             >
-                <div className="w-full h-full relative transform -skew-y-3 hover:skew-y-0 transition-transform duration-700">
+                <div className="w-full h-full relative transform -skew-y-3 hover:skew-y-0 transition-transform duration-700 ease-out">
                     <img
                         src="/memories/regenerated-panda.png"
                         alt="Panda Memory"
@@ -25,7 +27,7 @@ export default function FlankingBanners() {
                 </div>
             </motion.div>
 
-            {/* --- MOBILE LEFT FLANK (Visible only on small screens, positioned differently) --- */}
+            {/* --- MOBILE LEFT FLANK --- */}
             <div className="md:hidden absolute -left-10 top-20 w-40 h-60 opacity-40 rotate-12 z-0 pointer-events-none">
                 <img src="/memories/regenerated-panda.png" alt="Panda decoration" className="w-full h-full object-cover rounded-lg" />
             </div>
@@ -40,7 +42,8 @@ export default function FlankingBanners() {
                             key={i}
                             initial={{ opacity: 0, scale: 0 }}
                             whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: i * 0.1 + 0.5 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.1 + 0.2, type: "spring", stiffness: 200, damping: 10 }}
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                             fill="currentColor"
@@ -55,7 +58,8 @@ export default function FlankingBanners() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
                     className="font-mono text-xs md:text-sm tracking-[0.3em] uppercase text-white/50"
                 >
                     Since Day One • Forever
@@ -63,13 +67,14 @@ export default function FlankingBanners() {
 
                 {/* The Quote */}
                 <motion.h2
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5, duration: 1 }}
+                    initial={{ opacity: 0, scale: 0.95, filter: "blur(5px)" }}
+                    whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
                     className="text-3xl md:text-5xl font-serif leading-tight md:leading-snug text-white/90"
-                    style={{ fontFamily: "'Bodoni Moda', serif" }}
+                    style={{ fontFamily: "'Bodoni Moda', serif", willChange: "transform, opacity, filter" }}
                 >
-                    "It was such a joyful and affirming journey. Thank you for making life such a memorable and enriching masterpiece. I can't recommend you highly enough!"
+                    &quot;It was such a joyful and affirming journey. Thank you for making life such a memorable and enriching masterpiece. I can&apos;t recommend you highly enough!&quot;
                 </motion.h2>
 
                 {/* CTA Button */}
@@ -78,13 +83,14 @@ export default function FlankingBanners() {
                     whileInView={{ opacity: 1, y: 0 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    transition={{ delay: 1.2 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.8, type: "spring", stiffness: 300, damping: 20 }}
                     onClick={() => {
-                        document.getElementById('film-reel')?.scrollIntoView({ behavior: 'smooth' });
+                        document.getElementById('redemption-game')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className="mt-4 px-8 py-4 bg-white text-black font-bold tracking-widest uppercase text-xs md:text-sm rounded-full hover:bg-rose-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)]"
                 >
-                    View Time Capsule ↗
+                    Click for Redemption ↗
                 </motion.button>
             </div>
 
@@ -92,10 +98,12 @@ export default function FlankingBanners() {
             <motion.div
                 initial={{ x: 100, opacity: 0, rotate: 5 }}
                 whileInView={{ x: 0, opacity: 1, rotate: -3 }}
-                transition={{ duration: 1, ease: "easeOut" }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: "transform, opacity" }}
                 className="absolute right-[-5%] md:right-0 bottom-[10%] md:bottom-auto h-[50vh] md:h-[80vh] w-[40vw] md:w-[25vw] z-10 hidden md:block"
             >
-                <div className="w-full h-full relative transform skew-y-3 hover:skew-y-0 transition-transform duration-700">
+                <div className="w-full h-full relative transform skew-y-3 hover:skew-y-0 transition-transform duration-700 ease-out">
                     <img
                         src="/memories/regenerated-character.png"
                         alt="Character Memory"

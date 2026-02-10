@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Feather } from "lucide-react";
 
 // --- THE LETTER CONTENT ---
 const LETTER_LINES = [
@@ -14,162 +13,311 @@ const LETTER_LINES = [
     "I wouldn't want to build this universe with anyone else."
 ];
 
-export default function Letter() {
-    const [isOpened, setIsOpened] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
+// --- PHYSICS CONSTANTS ---
+const PARTICLE_COUNT = 800; // Stars
+const EASE = 0.05; // Forming text speed
 
-    // --- SOUND EFFECTS (Optional Placeholder) ---
-    const playMagicSound = () => {
-        // const audio = new Audio("/sounds/shimmer.mp3");
-        // audio.play().catch(() => {});
+export default function Letter() {
+    const [phase, setPhase] = useState<"void" | "charging" | "exploding" | "universe">("void");
+    const [progress, setProgress] = useState(0); // 0 to 100 for charging
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const requestRef = useRef<number>();
+
+    // Interaction Refs
+    const isHolding = useRef(false);
+    const holdStartTime = useRef(0);
+    const particles = useRef<Particle[]>([]);
+
+    // --- PARTICLE CLASS ---
+    class Particle {
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        size: number;
+        color: string;
+        targetX: number | null;
+        targetY: number | null;
+        friction: number;
+
+        constructor(w: number, h: number) {
+            this.x = Math.random() * w;
+            this.y = Math.random() * h;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.size = Math.random() * 2 + 0.5;
+
+            // Random Star Colors
+            const colors = ["#ffffff", "#ffecd1", "#ffe4e1", "#b0e0e6", "#ffd700"];
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+
+            this.targetX = null;
+            this.targetY = null;
+            this.friction = 0.98;
+        }
+
+        update(w: number, h: number, currentPhase: string, holdFactor: number) {
+            const cx = w / 2;
+            const cy = h / 2;
+
+            if (currentPhase === "charging") {
+                // SUCK INTO CENTER
+                const dx = cx - this.x;
+                const dy = cy - this.y;
+                // Stronger pull as holdFactor increases
+                const pullStrength = 0.05 * (holdFactor / 100);
+
+                this.vx += dx * pullStrength;
+                this.vy += dy * pullStrength;
+                this.vx *= 0.9;
+                this.vy *= 0.9;
+
+            } else if (currentPhase === "exploding") {
+                // BIG BANG: Handled by initial burst, just friction here
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+
+            } else if (currentPhase === "universe") {
+                // FLOAT / ORBIT
+                if (this.targetX !== null && this.targetY !== null) {
+                    // Form Text (if target set - future feature or subtle background shape)
+                    // For now, let's keep them drifting to form a galaxy, maybe targeted later?
+                    // Actually, let's just let them drift in universe mode for readability
+                    this.vx += (Math.random() - 0.5) * 0.02;
+                    this.vy += (Math.random() - 0.5) * 0.02;
+                } else {
+                    // Drift
+                    this.vx += (Math.random() - 0.5) * 0.02;
+                    this.vy += (Math.random() - 0.5) * 0.02;
+                }
+            } else {
+                // VOID: Gentle float
+                this.vx += (Math.random() - 0.5) * 0.01;
+                this.vy += (Math.random() - 0.5) * 0.01;
+            }
+
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Screen Wrap (only in void/universe if not text forming)
+            if (this.targetX === null) {
+                if (this.x < 0) this.x = w;
+                if (this.x > w) this.x = 0;
+                if (this.y < 0) this.y = h;
+                if (this.y > h) this.y = 0;
+            }
+        }
+
+        draw(ctx: CanvasRenderingContext2D) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = this.size * 2;
+            ctx.shadowColor = this.color;
+            ctx.fill();
+        }
+    }
+
+    // --- INITIALIZATION ---
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+
+        // Init Particles
+        if (particles.current.length === 0) {
+            particles.current = Array.from({ length: PARTICLE_COUNT }, () => new Particle(w, h));
+        }
+
+        const animate = () => {
+            // Clear
+            ctx.fillStyle = "rgba(5, 5, 10, 0.3)"; // Trails
+            if (phase === "exploding") ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; // Flash effect fade
+            ctx.fillRect(0, 0, w, h);
+
+            // Update Logic
+            if (isHolding.current && phase === "charging") {
+                const heldTime = Date.now() - holdStartTime.current;
+                const newProgress = Math.min((heldTime / 2000) * 100, 100); // 2s to charge
+                setProgress(newProgress);
+
+                if (newProgress >= 100) {
+                    triggerBigBang(w, h); // Pass dimensions
+                }
+            } else if (!isHolding.current && phase === "charging") {
+                // Decay if released early
+                setProgress(p => Math.max(p - 2, 0));
+            }
+
+            // Draw Particles
+            particles.current.forEach(p => {
+                p.update(w, h, phase, progress);
+                p.draw(ctx);
+            });
+
+            requestRef.current = requestAnimationFrame(animate);
+        };
+
+        requestRef.current = requestAnimationFrame(animate);
+
+        const handleResize = () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        };
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            if (requestRef.current) cancelAnimationFrame(requestRef.current);
+            window.removeEventListener("resize", handleResize);
+        };
+    }, [phase, progress]);
+
+    // --- HANDLERS ---
+
+    const startCharge = () => {
+        if (phase !== "void" && phase !== "charging") return;
+        setPhase("charging");
+        isHolding.current = true;
+        holdStartTime.current = Date.now();
     };
 
-    const handleOpen = () => {
-        playMagicSound();
-        setIsOpened(true);
+    const endCharge = () => {
+        if (phase !== "charging") return;
+        isHolding.current = false;
+        if (progress < 100) {
+            // Reset to void if failed
+            if (progress < 10) setPhase("void"); // Only reset if barely touched
+        }
+    };
+
+    const triggerBigBang = (w: number, h: number) => {
+        setPhase("exploding");
+        isHolding.current = false;
+
+        // EXPLOSION PHYSICS
+        particles.current.forEach(p => {
+            const angle = Math.random() * Math.PI * 2;
+            const force = Math.random() * 50 + 20; // Massive speed
+            p.vx = Math.cos(angle) * force;
+            p.vy = Math.sin(angle) * force;
+        });
+
+        // Transition to Universe/Text after explosion settles
+        setTimeout(() => {
+            setPhase("universe");
+        }, 2000);
     };
 
     return (
         <section
-            ref={containerRef}
-            className="relative min-h-screen w-full bg-[#050505] flex flex-col items-center justify-center overflow-hidden"
+            className="relative w-full h-screen bg-[#05050a] overflow-hidden cursor-crosshair select-none touch-none"
+            onMouseDown={startCharge}
+            onMouseUp={endCharge}
+            onTouchStart={startCharge}
+            onTouchEnd={endCharge}
+            onMouseLeave={endCharge}
         >
+            <canvas ref={canvasRef} className="absolute inset-0 z-10 block" />
 
-            {/* --- BACKGROUND MOOD (Always Present) --- */}
-            <div className="absolute inset-0 pointer-events-none">
-                {/* Subtle Heartbeat Glow in Center */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] bg-rose-900/10 blur-[150px] rounded-full animate-pulse-slow mix-blend-screen" />
-                <div className="bg-noise absolute inset-0 opacity-20 mix-blend-overlay" />
-            </div>
+            {/* --- UI OVERLAY --- */}
+            <AnimatePresence>
 
-            <AnimatePresence mode="wait">
-                {!isOpened ? (
-                    /* --- STEP 1: THE MASSIVE ENVELOPE GATE --- */
+                {/* 1. VOID INSTRUCTION */}
+                {phase === "void" && (
                     <motion.div
-                        key="envelope-gate"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.5, filter: "blur(20px)" }}
-                        transition={{ duration: 1.5, ease: "easeInOut" }}
-                        className="relative z-20 flex flex-col items-center justify-center"
-                    >
-                        <motion.div
-                            onClick={handleOpen}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="cursor-pointer group relative w-[650px] h-[450px] bg-[#fda4af] shadow-[0_0_50px_rgba(253,164,175,0.3)] flex items-center justify-center transform transition-transform duration-300"
-                        >
-                            {/* Flap (Top Triangle) */}
-                            <div className="absolute top-0 left-0 w-0 h-0 border-l-[325px] border-r-[325px] border-t-[260px] border-l-transparent border-r-transparent border-t-[#f43f5e] origin-top z-20 group-hover:origin-top group-hover:rotate-x-180 transition-all duration-700 shadow-sm" />
-
-                            {/* Address Text */}
-                            <div className="z-10 text-center opacity-90 group-hover:opacity-60 transition-opacity mt-12">
-                                <p className="italic text-white drop-shadow-sm text-5xl md:text-7xl tracking-tight" style={{ fontFamily: "var(--font-bodoni), serif" }}>To My Favorite Person</p>
-                                <p className="font-mono text-sm text-rose-100 mt-3 uppercase tracking-[0.3em] font-bold">Confidential</p>
-                            </div>
-
-                            {/* Wax Seal */}
-                            <div className="absolute z-30 w-24 h-24 bg-[#9f1239] rounded-full flex items-center justify-center shadow-lg border-4 border-[#881337] group-hover:scale-110 transition-transform">
-                                <span className="text-rose-200 font-serif font-bold text-4xl">♥</span>
-                            </div>
-
-                            {/* Bottom Flaps */}
-                            <div className="absolute bottom-0 left-0 w-0 h-0 border-l-[325px] border-b-[240px] border-l-[#fb7185] border-b-transparent opacity-90" />
-                            <div className="absolute bottom-0 right-0 w-0 h-0 border-r-[325px] border-b-[240px] border-r-[#fb7185] border-b-transparent opacity-90" />
-
-                            {/* "Flash" Effect on Click (White Overlay) */}
-                            <div className="absolute inset-0 bg-white opacity-0 active:opacity-40 transition-opacity duration-100 rounded-sm pointer-events-none z-40" />
-                        </motion.div>
-
-                        <p className="mt-8 text-white/40 text-sm font-mono tracking-widest uppercase animate-pulse">
-                            ( Click to Open )
-                        </p>
-                    </motion.div>
-
-                ) : (
-                    /* --- STEP 2: THE DARK MODE REVEAL CONTENT --- */
-                    <motion.div
-                        key="letter-content"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 2, ease: "easeOut" }}
-                        className="relative z-10 w-full max-w-4xl py-32 px-6 flex flex-col items-center"
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
                     >
-                        {/* Header Tag */}
-                        <div className="mb-24 text-center">
-                            <motion.div
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5, duration: 1 }}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm"
-                            >
-                                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                                <span className="text-xs font-bold tracking-[0.2em] text-rose-200 uppercase">
-                                    A Note For You
-                                </span>
-                            </motion.div>
+                        <div className="text-center">
+                            <p className="text-white/30 font-mono text-xs tracking-[0.5em] uppercase animate-pulse">
+                                Touch & Hold to Create
+                            </p>
                         </div>
-
-                        {/* Staggered Text Content */}
-                        <div className="flex flex-col gap-24 md:gap-32 w-full">
-                            {LETTER_LINES.map((line, i) => (
-                                <ScrollRevealLine key={i} index={i}>
-                                    {line}
-                                </ScrollRevealLine>
-                            ))}
-                        </div>
-
-                        {/* Signature Block */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ margin: "-100px" }}
-                            transition={{ duration: 1.5 }}
-                            className="relative mt-40 text-center"
-                        >
-                            <div className="text-white/40 text-sm mb-6 tracking-widest font-mono">WITH ALL MY LOVE,</div>
-                            <div className="font-serif italic text-5xl md:text-7xl text-rose-500 -rotate-2 mix-blend-screen" style={{ fontFamily: "serif" }}>
-                                Your Name
-                            </div>
-
-                            {/* Floating Feather */}
-                            <motion.div
-                                animate={{ y: [-10, 10, -10], rotate: [0, 5, 0] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute -right-16 -bottom-4 opacity-60"
-                            >
-                                <Feather className="w-20 h-20 text-rose-200/20" strokeWidth={1} />
-                            </motion.div>
-                        </motion.div>
-
                     </motion.div>
                 )}
+
+                {/* 2. CHARGING FEEDBACK */}
+                {phase === "charging" && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                        {/* Shaking Text */}
+                        <motion.div
+                            animate={{
+                                x: [0, -5, 5, -5, 5, 0],
+                                filter: [`blur(0px)`, `blur(${progress / 20}px)`]
+                            }}
+                            transition={{ duration: 0.2, repeat: Infinity }}
+                        >
+                            <p className="text-white font-bold text-4xl md:text-6xl tracking-widest uppercase opacity-80"
+                                style={{ textShadow: `0 0 ${progress}px white` }}>
+                                {Math.floor(progress)}%
+                            </p>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* 3. UNIVERSE / LETTER CONTENT */}
+                {phase === "universe" && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 2, delay: 1 }}
+                        className="absolute inset-0 z-30 overflow-y-auto"
+                    >
+                        <div className="min-h-screen flex flex-col items-center justify-center py-20 px-6">
+
+                            {/* The "Constellation" Header */}
+                            <motion.h1
+                                initial={{ opacity: 0, scale: 2, filter: "blur(20px)" }}
+                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                transition={{ duration: 2, ease: "easeOut" }}
+                                className="text-5xl md:text-7xl font-serif text-transparent bg-clip-text bg-gradient-to-b from-white to-rose-200 text-center mb-16 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                                style={{ fontFamily: "serif" }}
+                            >
+                                The Beginning
+                            </motion.h1>
+
+                            {/* Letter Lines */}
+                            <div className="space-y-12 max-w-2xl text-center">
+                                {LETTER_LINES.map((line, i) => (
+                                    <motion.p
+                                        key={i}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: 2 + (i * 0.8), duration: 1 }}
+                                        className="text-white/80 font-serif text-xl md:text-3xl leading-relaxed"
+                                    >
+                                        {line}
+                                    </motion.p>
+                                ))}
+                            </div>
+
+                            {/* Final Signature */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 1 }}
+                                transition={{ delay: 6, duration: 1.5 }}
+                                className="mt-24"
+                            >
+                                <p className="text-white/40 font-mono text-xs tracking-widest uppercase mb-4 text-center">
+                                    EST. 2024
+                                </p>
+                                <div className="text-rose-500 font-serif italic text-4xl">
+                                    Your Name
+                                </div>
+                            </motion.div>
+
+                        </div>
+                    </motion.div>
+                )}
+
             </AnimatePresence>
-
         </section>
-    );
-}
-
-// --- SUB-COMPONENT: SCROLL REVEAL TEXT ---
-function ScrollRevealLine({ children, index }: { children: string, index: number }) {
-    return (
-        <motion.div
-            initial={{ opacity: 0.1, y: 50, filter: "blur(10px)" }}
-            whileInView={{
-                opacity: 1,
-                y: 0,
-                filter: "blur(0px)",
-            }}
-            viewport={{ once: true, margin: "-15% 0px -15% 0px" }} // Triggers when element is in the middle 70% of screen
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="flex justify-center"
-        >
-            <p className={`
-            text-4xl md:text-6xl font-serif leading-tight text-center max-w-3xl
-            ${index % 2 === 0 ? "text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" : "text-rose-100/90 drop-shadow-[0_0_15px_rgba(253,164,175,0.1)]"}
-        `}>
-                {children}
-            </p>
-        </motion.div>
     );
 }

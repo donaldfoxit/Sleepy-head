@@ -10,10 +10,20 @@ declare global {
     }
 }
 
-export default function BackgroundMusic() {
+interface BackgroundMusicProps {
+    shouldPlay?: boolean;
+}
+
+export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicProps) {
     const playerRef = useRef<any>(null);
     const isUnlocked = useStore((state) => state.isUnlocked);
     const hasStartedRef = useRef(false);
+    const shouldPlayRef = useRef(shouldPlay);
+
+    // Keep ref in sync
+    useEffect(() => {
+        shouldPlayRef.current = shouldPlay;
+    }, [shouldPlay]);
 
     useEffect(() => {
         // 1. Load the IFrame Player API code asynchronously.
@@ -40,7 +50,13 @@ export default function BackgroundMusic() {
                     'playsinline': 1,
                 },
                 events: {
-                    'onReady': onPlayerReady,
+                    'onReady': (event: any) => {
+                        // Check strict ref value to avoid closure staleness
+                        if (shouldPlayRef.current) {
+                            event.target.playVideo();
+                            hasStartedRef.current = true;
+                        }
+                    },
                 }
             });
         };
@@ -52,43 +68,21 @@ export default function BackgroundMusic() {
         };
     }, []);
 
-    // Watch for Unlock State
+    // Watch for Start Trigger (or Unlock state for backup)
     useEffect(() => {
-        if (isUnlocked && playerRef.current && playerRef.current.playVideo) {
+        if (shouldPlay && playerRef.current && playerRef.current.playVideo) {
             attemptPlay();
         }
-    }, [isUnlocked]);
+    }, [shouldPlay]);
 
     const attemptPlay = () => {
         if (hasStartedRef.current) return;
 
         if (playerRef.current && playerRef.current.playVideo) {
-            playerRef.current.setVolume(15);
+            playerRef.current.setVolume(25); // Slightly higher volume
             playerRef.current.playVideo();
             hasStartedRef.current = true;
         }
-    };
-
-    const onPlayerReady = (event: any) => {
-        // If already unlocked when ready (race condition), play
-        if (useStore.getState().isUnlocked) {
-            attemptPlay();
-        }
-
-        // Fallback: iOS often blocks async play(). 
-        // We attach a one-time listener to the document to force play on next touch.
-        const forcePlayOnInteraction = () => {
-            if (useStore.getState().isUnlocked && playerRef.current && playerRef.current.playVideo) {
-                playerRef.current.playVideo();
-                // Only remove if it actually started playing? 
-                // We'll trust the API for now.
-                document.removeEventListener('click', forcePlayOnInteraction);
-                document.removeEventListener('touchstart', forcePlayOnInteraction);
-            }
-        };
-
-        document.addEventListener('click', forcePlayOnInteraction);
-        document.addEventListener('touchstart', forcePlayOnInteraction);
     };
 
     return (

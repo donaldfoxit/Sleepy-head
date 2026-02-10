@@ -2,24 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { Sparkles, Wand2 } from "lucide-react";
 
 // --- CONTENT CONFIGURATION ---
 const SECTIONS = [
     {
         id: "spark",
         title: "The Spark",
-        content: "It started with a glance, a moment that felt like the universe aligning. I didn't know then that you would become my everything, but my soul recognized you before my heart even understood."
-    },
-    {
-        id: "fire",
-        title: "The Fire",
-        content: "Every day since has been a burning testament to what love should be. You challenge me, you hold me, and you make the ordinary feel like a cinematic masterpiece. You are my muse and my peace."
-    },
-    {
-        id: "eternal",
-        title: "The Eternal",
-        content: "I promise to build a future as beautiful as you are. To stand by you in the quiet moments and the loud ones. This isn't just for now; it's for every lifetime I'm lucky enough to find you in."
+        content: "I think about how we met more than I admit. Not just because of the memory, but because I’m amazed at how something so simple quietly became this meaningful.\n\nFrom the first time I looked into your eyes, it was always calm.\nI remember telling 'you-know-who' before we stepped into that elevator...\n\nHonestly, it wasn’t hope. It wasn’t guessing.\nIt was just a calm knowing.\n\nBeing around you has never felt rushed or loud.\nIt feels beautifully calm.\nAnd that calm stays with me, even when you are not there.\n\nSometimes I sit and retrace it all—how we met, where we are now, why it happened this way.\nAnd every time, I’m reminded that some of the most amazing things in life don’t announce themselves.\nThey just show up… and change everything quietly."
     }
 ];
 
@@ -28,7 +18,7 @@ interface ManifestoProps {
 }
 
 export default function Manifesto({ onComplete }: ManifestoProps) {
-    const [activeSection, setActiveSection] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<string | null>(null); // Start empty, wait for click
     const [viewedSections, setViewedSections] = useState<Set<string>>(new Set());
     const [displayedText, setDisplayedText] = useState("");
     const [isTyping, setIsTyping] = useState(false);
@@ -57,7 +47,7 @@ export default function Manifesto({ onComplete }: ManifestoProps) {
                     return newSet;
                 });
             }
-        }, 30); // Typing speed
+        }, 50); // Slower for magical effect
 
         return () => clearInterval(typingInterval);
     }, [activeSection]);
@@ -75,13 +65,6 @@ export default function Manifesto({ onComplete }: ManifestoProps) {
 
     return (
         <section className="relative min-h-[80vh] w-full flex items-center justify-center py-20 px-4 md:px-20 overflow-hidden">
-
-            {/* Background Atmosphere */}
-            {/* Background Atmosphere - REMOVED for seamless blend */}
-            {/* <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-rose-900/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-amber-900/10 rounded-full blur-[100px]" />
-            </div> */}
 
             <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16">
 
@@ -132,7 +115,8 @@ export default function Manifesto({ onComplete }: ManifestoProps) {
                                     style={{ fontFamily: "var(--font-bodoni), serif" }}
                                 >
                                     {section.title}
-                                    {isActive && <SparkleDust />}
+                                    {/* Burst on Active, key forces re-render if clicked again */}
+                                    {isActive && <PinkGlitterBurst key={Date.now()} />}
                                 </span>
 
                                 {/* Viewed Indicator */}
@@ -182,19 +166,30 @@ export default function Manifesto({ onComplete }: ManifestoProps) {
                                     className="pt-12"
                                 >
                                     <p
-                                        className="text-white/90 text-xl md:text-3xl leading-relaxed font-light tracking-wide"
+                                        className="text-white/80 text-base md:text-lg leading-relaxed font-sans font-light tracking-wide"
                                         style={{ whiteSpace: "pre-wrap" }}
                                     >
                                         {displayedText}
                                         {isTyping && (
-                                            <span className="inline-block w-[2px] h-[1em] bg-rose-500 ml-1 animate-pulse align-middle" />
+                                            <span className="inline-block ml-1 align-baseline relative -top-1">
+                                                <motion.span
+                                                    animate={{
+                                                        rotate: [0, 15, -5, 0],
+                                                        x: [0, 2, -2, 0]
+                                                    }}
+                                                    transition={{ repeat: Infinity, duration: 0.4 }}
+                                                    className="inline-block"
+                                                >
+                                                    <Wand2 size={24} className="text-rose-400 drop-shadow-[0_0_12px_rgba(251,113,133,0.8)]" />
+                                                </motion.span>
+                                            </span>
                                         )}
                                     </p>
                                 </motion.div>
                             ) : (
                                 <div className="flex flex-col items-center justify-center text-white/20 h-full pt-10">
-                                    <p className="font-mono text-sm tracking-widest uppercase">
-                                        Waiting for input...
+                                    <p className="font-mono text-sm tracking-widest uppercase animate-pulse">
+                                        Select "The Spark" to read...
                                     </p>
                                 </div>
                             )}
@@ -213,43 +208,70 @@ export default function Manifesto({ onComplete }: ManifestoProps) {
     );
 }
 
-// --- SUB-COMPONENT: SPARKLE DUST ---
-function SparkleDust() {
-    // Generate random particles
-    const particles = Array.from({ length: 8 }).map((_, i) => ({
+// --- SUB-COMPONENT: PINK GLITTER BURST ---
+function PinkGlitterBurst() {
+    // Generate many particles for a "Massive Burst"
+    const particles = Array.from({ length: 40 }).map((_, i) => ({
         id: i,
-        x: Math.random() * 100 - 20, // Spread around text
-        y: Math.random() * 40 - 20,
-        size: Math.random() * 3 + 1,
-        delay: Math.random() * 2,
+        angle: Math.random() * 360,
+        distance: Math.random() * 80 + 60, // Explode outwards further (60-140px) to clear text
+        size: Math.random() * 6 + 2,
+        color: Math.random() > 0.5 ? "#fb7185" : "#f43f5e", // Rose-400 or Rose-500
+        delay: Math.random() * 0.1,
+        rotation: Math.random() * 360,
     }));
 
     return (
-        <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
+            {/* Flash Effect */}
+            <motion.div
+                initial={{ scale: 0, opacity: 0.8 }}
+                animate={{ scale: 1.5, opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute w-32 h-12 bg-radial-gradient(circle, rgba(251,113,133,0.6) 0%, transparent 70%) rounded-full blur-md"
+            />
+
             {particles.map((p) => (
                 <motion.div
                     key={p.id}
-                    className="absolute rounded-full bg-amber-300 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
-                    style={{
-                        width: p.size,
-                        height: p.size,
-                        top: "50%",
-                        left: "50%",
-                    }}
-                    initial={{ opacity: 0, x: 0, y: 0 }}
+                    className="absolute"
+                    initial={{ x: 0, y: 0, opacity: 1, scale: 0, rotate: 0 }}
                     animate={{
-                        opacity: [0, 1, 0],
-                        x: p.x,
-                        y: p.y,
-                        scale: [0, 1, 0]
+                        x: Math.cos(p.angle * (Math.PI / 180)) * p.distance,
+                        y: Math.sin(p.angle * (Math.PI / 180)) * p.distance * 0.5, // Flatten slightly for text aspect ratio
+                        opacity: 0,
+                        scale: [0, 1, 0],
+                        rotate: p.rotation + 180,
                     }}
                     transition={{
-                        duration: 2 + Math.random(),
-                        repeat: Infinity,
+                        duration: 1 + Math.random(),
+                        ease: "easeOut",
                         delay: p.delay,
-                        ease: "easeInOut"
                     }}
-                />
+                >
+                    {/* Random Shapes: Circle or Star */}
+                    {p.id % 2 === 0 ? (
+                        <div
+                            className="rounded-full"
+                            style={{
+                                backgroundColor: p.color,
+                                width: p.size,
+                                height: p.size,
+                                boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+                            }}
+                        />
+                    ) : (
+                        <svg
+                            viewBox="0 0 24 24"
+                            width={p.size * 1.5}
+                            height={p.size * 1.5}
+                            fill={p.color}
+                            className="drop-shadow-md"
+                        >
+                            <path d="M12 2L15 9L22 9L16 14L18 21L12 17L6 21L8 14L2 9L9 9L12 2Z" />
+                        </svg>
+                    )}
+                </motion.div>
             ))}
         </div>
     );

@@ -171,7 +171,7 @@ export default function Stargazer({ onComplete }: StargazerProps) {
                             className="text-4xl md:text-6xl italic text-amber-200 drop-shadow-[0_0_30px_rgba(251,191,36,0.6)]"
                             style={{ fontFamily: "var(--font-bodoni), serif" }}
                         >
-                            That's why you're my princess
+                            That&apos;s why you&apos;re my princess
                         </motion.h2>
 
                         {/* Sparkles / Particles */}
