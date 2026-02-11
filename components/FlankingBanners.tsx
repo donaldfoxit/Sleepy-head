@@ -16,7 +16,11 @@ export default function FlankingBanners() {
                 style={{ willChange: "transform, opacity" }}
                 className="absolute left-[-5%] md:left-0 top-[10%] md:top-auto h-[50vh] md:h-[80vh] w-[40vw] md:w-[25vw] z-10 hidden md:block"
             >
-                <div className="w-full h-full relative transform -skew-y-3 hover:skew-y-0 transition-transform duration-700 ease-out">
+                <motion.div
+                    animate={{ y: [0, -15, 0], rotate: [0, 2, 0] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-full h-full relative transform -skew-y-3 hover:skew-y-0 transition-transform duration-700 ease-out"
+                >
                     <img
                         src="/memories/regenerated-panda.png"
                         alt="Panda Memory"
@@ -24,13 +28,17 @@ export default function FlankingBanners() {
                     />
                     {/* Tape/Sticker Effect */}
                     <div className="absolute -top-10 left-10 w-20 h-40 bg-white/10 blur-xl rotate-45" />
-                </div>
+                </motion.div>
             </motion.div>
 
             {/* --- MOBILE LEFT FLANK --- */}
-            <div className="md:hidden absolute -left-10 top-20 w-40 h-60 opacity-40 rotate-12 z-0 pointer-events-none">
+            <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="md:hidden absolute -left-10 top-20 w-40 h-60 opacity-40 rotate-12 z-0 pointer-events-none"
+            >
                 <img src="/memories/regenerated-panda.png" alt="Panda decoration" className="w-full h-full object-cover rounded-lg" />
-            </div>
+            </motion.div>
 
             {/* --- CENTER CONTENT (The "Testimonial" / Love Note) --- */}
             <div className="relative z-20 max-w-2xl px-8 text-center flex flex-col items-center gap-8">
@@ -115,7 +123,11 @@ export default function FlankingBanners() {
                 style={{ willChange: "transform, opacity" }}
                 className="absolute right-[-5%] md:right-0 bottom-[10%] md:bottom-auto h-[50vh] md:h-[80vh] w-[40vw] md:w-[25vw] z-10 hidden md:block"
             >
-                <div className="w-full h-full relative transform skew-y-3 hover:skew-y-0 transition-transform duration-700 ease-out">
+                <motion.div
+                    animate={{ y: [0, -15, 0], rotate: [0, -2, 0] }}
+                    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} // Slight offset from left
+                    className="w-full h-full relative transform skew-y-3 hover:skew-y-0 transition-transform duration-700 ease-out"
+                >
                     <img
                         src="/memories/regenerated-character.png"
                         alt="Character Memory"
@@ -123,13 +135,17 @@ export default function FlankingBanners() {
                     />
                     {/* Tape/Sticker Effect */}
                     <div className="absolute -bottom-10 right-10 w-20 h-40 bg-white/10 blur-xl -rotate-45" />
-                </div>
+                </motion.div>
             </motion.div>
 
             {/* --- MOBILE RIGHT FLANK --- */}
-            <div className="md:hidden absolute -right-10 bottom-20 w-40 h-60 opacity-40 -rotate-12 z-0 pointer-events-none">
+            <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                className="md:hidden absolute -right-10 bottom-20 w-40 h-60 opacity-40 -rotate-12 z-0 pointer-events-none"
+            >
                 <img src="/memories/regenerated-character.png" alt="Character decoration" className="w-full h-full object-cover rounded-lg" />
-            </div>
+            </motion.div>
 
         </section>
     );
