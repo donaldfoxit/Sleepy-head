@@ -71,7 +71,7 @@ export default function Manifesto({ onComplete }: ManifestoProps) {
                 {/* --- LEFT COLUMN: NAVIGATION --- */}
                 <div className="md:col-span-4 flex flex-col justify-center space-y-6">
                     <h2 className="text-white/40 uppercase tracking-[0.2em] text-sm mb-4 font-mono">
-                        Select a Chapter
+                        Click to Spark
                     </h2>
 
                     {SECTIONS.map((section) => {
