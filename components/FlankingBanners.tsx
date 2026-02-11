@@ -75,17 +75,17 @@ export default function FlankingBanners() {
                     style={{ fontFamily: "'Bodoni Moda', serif", willChange: "transform, opacity, filter" }}
                 >
                     &quot;Every moment with you feels good in a quiet way.
-                    Not because we’re doing anything extraordinary — but because it’s you, baby.
+                    Not because we’re doing a lot.... but because it’s you, baby.
 
                     I find myself wanting more time just to be around you.
-                    To take little snapshots of your smile… ..your laugh… your eyes when they soften.
+                    To take little snapshots of your smile… your laugh… your eyes when they soften.
                     The way you sit close.
 
                     Even the simplest times with you stay with me.
                     The random conversations.
                     Every hour we’ve spent together has felt easy. Real.
 
-                    And that means more to me than you know.&quot;
+                    And that means more to me than you know. And even if i have defeated you too many times, this is your chance for redemption&quot;
                 </motion.div>
 
                 {/* CTA Button */}
