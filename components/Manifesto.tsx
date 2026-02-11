@@ -9,7 +9,7 @@ const SECTIONS = [
     {
         id: "spark",
         title: "The Spark",
-        content: "Every moment with you feels good in a quiet way.\nNot because we’re doing anything extraordinary — but because it’s you, baby.\n\nI find myself wanting more time just to be around you.\nTo take little snapshots of your smile… ..your laugh… your eyes when they soften.\nThe way you sit close.\n\nEven the simplest times with you stay with me.\nThe random conversations.\nEvery hour we’ve spent together has felt easy. Real.\n\nAnd that means more to me than you know."
+        content: "I think about how we met more than I admit. Not just because of the memory, but because I’m amazed at how something so simple quietly became this meaningful.\n\nFrom the first time I looked into your eyes, it was always calm.\nI remember telling 'you-know-who' before we stepped into that elevator...\n\nHonestly, it wasn’t hope. It wasn’t guessing.\nIt was just a calm knowing.\n\nBeing around you has never felt rushed or loud.\nIt feels beautifully calm.\nAnd that calm stays with me, even when you are not there.\n\nSometimes I sit and retrace it all—how we met, where we are now, why it happened this way.\nAnd every time, I’m reminded that some of the most amazing things in life don’t announce themselves.\nThey just show up… and change everything quietly."
     }
 ];
 

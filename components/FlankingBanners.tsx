@@ -65,17 +65,28 @@ export default function FlankingBanners() {
                     Since Day One • Forever
                 </motion.div>
 
-                {/* The Quote */}
-                <motion.h2
+                {/* The Quote / Poem */}
+                <motion.div
                     initial={{ opacity: 0, scale: 0.95, filter: "blur(5px)" }}
                     whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
-                    className="text-3xl md:text-5xl font-serif leading-tight md:leading-snug text-white/90"
+                    className="text-lg md:text-2xl font-serif leading-relaxed text-white/90 whitespace-pre-line"
                     style={{ fontFamily: "'Bodoni Moda', serif", willChange: "transform, opacity, filter" }}
                 >
-                    &quot;It was such a joyful and affirming journey. Thank you for making life such a memorable and enriching masterpiece. I can&apos;t recommend you highly enough!&quot;
-                </motion.h2>
+                    &quot;Every moment with you feels good in a quiet way.
+                    Not because we’re doing anything extraordinary — but because it’s you, baby.
+
+                    I find myself wanting more time just to be around you.
+                    To take little snapshots of your smile… ..your laugh… your eyes when they soften.
+                    The way you sit close.
+
+                    Even the simplest times with you stay with me.
+                    The random conversations.
+                    Every hour we’ve spent together has felt easy. Real.
+
+                    And that means more to me than you know.&quot;
+                </motion.div>
 
                 {/* CTA Button */}
                 <motion.button
