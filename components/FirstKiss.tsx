@@ -83,7 +83,7 @@ export default function FirstKiss() {
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src="/images/first-kiss.jpg"
-                                    alt="First Kiss Memory"
+                                    alt="First Kiss Memory: Dashboard showing Selfish by Justin Timberlake"
                                     className="w-full h-full object-cover filter contrast-[1.1] saturate-[1.1] sepia-[0.1]"
                                 />
                             </div>
