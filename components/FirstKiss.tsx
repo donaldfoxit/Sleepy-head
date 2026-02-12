@@ -16,7 +16,7 @@ export default function FirstKiss() {
             <div className="absolute inset-0 bg-gradient-to-br from-red-950/20 via-black to-black" />
             <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
 
-            <div className="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
+            <div className="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
 
                 {/* --- LEFT: THE DASHBOARD MEMORY --- */}
                 <motion.div
@@ -59,37 +59,53 @@ export default function FirstKiss() {
 
 
                 {/* --- RIGHT: THE REAL PHOTO --- */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9, rotate: 5 }}
-                    whileInView={{ opacity: 1, scale: 1, rotate: 3 }}
-                    transition={{ duration: 1, delay: 0.3, type: "spring", bounce: 0.4 }}
-                    viewport={{ once: true }}
-                    className="relative group"
-                >
-                    {/* Glow Layer */}
-                    <div
-                        className="absolute -inset-4 bg-rose-600/20 blur-xl rounded-[2rem] group-hover:bg-rose-600/30 transition-all duration-700"
-                    />
+                <div className="relative">
+                    {/* --- THE REAL PHOTO --- */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, rotate: 5 }}
+                        whileInView={{ opacity: 1, scale: 1, rotate: 3 }}
+                        transition={{ duration: 1, delay: 0.3, type: "spring", bounce: 0.4 }}
+                        viewport={{ once: true }}
+                        className="relative group z-10"
+                    >
+                        {/* Glow Layer */}
+                        <div
+                            className="absolute -inset-4 bg-rose-600/20 blur-xl rounded-[2rem] group-hover:bg-rose-600/30 transition-all duration-700"
+                        />
 
-                    {/* The Photo Container */}
-                    <div className="relative w-[300px] md:w-[400px] h-[400px] md:h-[500px] bg-white p-3 shadow-2xl rotate-2 transform transition-transform duration-700 hover:rotate-0 hover:scale-[1.02]">
-                        {/* Film Grain/Touch */}
-                        <div className="absolute inset-0 z-20 pointer-events-none opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dust.png')]" />
+                        {/* The Photo Container */}
+                        <div className="relative w-[300px] md:w-[400px] h-[400px] md:h-[500px] bg-white p-3 shadow-2xl rotate-2 transform transition-transform duration-700 hover:rotate-0 hover:scale-[1.02]">
+                            {/* Film Grain/Touch */}
+                            <div className="absolute inset-0 z-20 pointer-events-none opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dust.png')]" />
 
-                        {/* The Image */}
-                        <div className="w-full h-full overflow-hidden bg-black/10 relative">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src="/images/first-kiss.jpg"
-                                alt="First Kiss Memory"
-                                className="w-full h-full object-cover filter contrast-[1.1] saturate-[1.1] sepia-[0.1]"
-                            />
+                            {/* The Image */}
+                            <div className="w-full h-full overflow-hidden bg-black/10 relative">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src="/images/first-kiss.jpg"
+                                    alt="First Kiss Memory"
+                                    className="w-full h-full object-cover filter contrast-[1.1] saturate-[1.1] sepia-[0.1]"
+                                />
+                            </div>
+
+                            {/* Tape Effect */}
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-10 bg-white/20 backdrop-blur-sm rotate-2 shadow-sm border border-white/10 z-30 opacity-60" />
                         </div>
+                    </motion.div>
 
-                        {/* Tape Effect */}
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-10 bg-white/20 backdrop-blur-sm rotate-2 shadow-sm border border-white/10 z-30 opacity-60" />
-                    </div>
-                </motion.div>
+                    {/* --- THE KISS EMOJI (To the side) --- */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0, x: -50, rotate: -45 }}
+                        whileInView={{ opacity: 1, scale: 1, x: 0, rotate: -15 }}
+                        transition={{ duration: 0.8, delay: 0.6, type: "spring", bounce: 0.5 }}
+                        viewport={{ once: true }}
+                        className="absolute -bottom-8 -left-12 md:-left-20 z-20 pointer-events-none"
+                    >
+                        <div className="text-[80px] md:text-[120px] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] animate-pulse-slow">
+                            💋
+                        </div>
+                    </motion.div>
+                </div>
 
             </div>
         </section>
