@@ -34,11 +34,11 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                 <div className="relative flex items-center justify-center w-32 h-32">
                     {/* Glow Behind Heart Only (Radial Gradient to prevent box glitch) */}
                     <motion.div
-                        animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute inset-0 rounded-full pointer-events-none"
+                        className="absolute inset-0 rounded-full blur-2xl pointer-events-none"
                         style={{
-                            background: "radial-gradient(circle, rgba(244, 63, 94, 0.4) 0%, transparent 70%)"
+                            background: "radial-gradient(circle, rgba(225, 29, 72, 0.4) 0%, transparent 70%)"
                         }}
                     />
 

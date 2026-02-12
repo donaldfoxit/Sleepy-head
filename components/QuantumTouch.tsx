@@ -2,9 +2,10 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Fingerprint } from "lucide-react";
 import gsap from "gsap";
 
-// --- TYPES ---
+// Particle Interface
 interface Particle {
     x: number;
     y: number;
@@ -13,377 +14,499 @@ interface Particle {
     size: number;
     color: string;
     life: number;
-    baseX: number;
-    baseY: number;
 }
 
 export default function QuantumTouch() {
-    const [status, setStatus] = useState<"idle" | "syncing" | "complete">("idle");
-    const [progress, setProgress] = useState(0); // 0-100
-    const [showDates, setShowDates] = useState(false); // Finale State
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
+    const [status, setStatus] = useState<"idle" | "charging" | "complete">("idle");
+    const [charge, setCharge] = useState(0); // For UI
+    const chargeRef = useRef(0); // For Animation Loop (Latest value)
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const particles = useRef<Particle[]>([]);
     const animationFrame = useRef<number>(0);
     const isHolding = useRef(false);
+    const [showTicket, setShowTicket] = useState(false); // Finale State
+
+    // --- STATE FOR FLIP CARDS ---
+    const [selectedCard, setSelectedCard] = useState<"cinema" | "car" | null>(null);
 
     // --- CONFIGURATION ---
-    const CHARGE_SPEED = 0.6;
-    const DECAY_SPEED = 0.4;
+    const CHARGE_SPEED = 0.5; // How fast it charges per frame
+    const DECAY_SPEED = 1.0;  // How fast it drains when released
 
-    // --- PARTICLE SYSTEM ---
+    // Initialize Particles & Animation Loop
     useEffect(() => {
+        if (!canvasRef.current) return;
         const canvas = canvasRef.current;
-        if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
+        // Resize Canvas
         const resize = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            initParticles();
         };
-
-        const initParticles = () => {
-            particles.current = [];
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            // Create a "Nebula" cloud
-            for (let i = 0; i < 300; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * 200; // Cloud radius
-                const x = cx + Math.cos(angle) * dist;
-                const y = cy + Math.sin(angle) * dist;
-
-                particles.current.push({
-                    x, y,
-                    baseX: x, baseY: y,
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
-                    size: Math.random() * 2 + 0.5,
-                    color: Math.random() > 0.5 ? "rgba(244, 63, 94," : "rgba(251, 191, 36,", // Partial rgba string
-                    life: Math.random() * 100
-                });
-            }
-        };
-
         resize();
         window.addEventListener("resize", resize);
 
+        // Spawn Initial Ambient Particles
+        if (particles.current.length === 0) {
+            for (let i = 0; i < 200; i++) {
+                particles.current.push(createParticle(canvas));
+            }
+        }
+
         const loop = () => {
-            // Update Progress
-            if (status !== "complete") {
-                if (isHolding.current) {
-                    setProgress(p => Math.min(p + CHARGE_SPEED, 100));
-                } else {
-                    setProgress(p => Math.max(p - DECAY_SPEED, 0));
-                }
-            }
-
-            // Check Complete
-            if (progress >= 100 && status !== "complete") {
-                handleCompletion();
-            }
-
-            // Draw
+            if (!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // "Nebula" Logic
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const pulseFactor = 1 + (progress / 100) * 0.5; // Expands as you hold
-
-            particles.current.forEach(p => {
-                // Breathing motion
-                const time = Date.now() * 0.001;
-                const breath = Math.sin(time + p.x) * 0.5;
-
-                // If holding, suck in slightly, then explode on complete
-                let tx = p.baseX;
-                let ty = p.baseY;
-
+            // Update Charge Logic
+            if (status !== "complete") {
                 if (isHolding.current) {
-                    // Attraction to center (jittery)
-                    tx = cx + (p.baseX - cx) * 0.8;
-                    ty = cy + (p.baseY - cy) * 0.8;
+                    const newCharge = Math.min(chargeRef.current + CHARGE_SPEED, 100);
+                    chargeRef.current = newCharge;
+                    setCharge(newCharge); // Sync UI
+                } else {
+                    const newCharge = Math.max(chargeRef.current - DECAY_SPEED, 0);
+                    chargeRef.current = newCharge;
+                    setCharge(newCharge); // Sync UI
                 }
+            }
 
-                p.x += (tx - p.x) * 0.05;
-                p.y += (ty - p.y) * 0.05;
-                p.x += Math.sin(time * 2 + p.y * 0.01) * 0.5; // Organic drift
+            // Check for Completion
+            if (chargeRef.current >= 100 && status !== "complete") {
+                completeSequence();
+            }
 
-                // Opacity based on charge
-                const alpha = 0.3 + (progress / 150) + Math.random() * 0.2;
-
-                ctx.fillStyle = `${p.color} ${alpha})`;
+            // Render Particles
+            particles.current.forEach((p, i) => {
+                updateParticle(p, canvas.width, canvas.height, isHolding.current, chargeRef.current);
+                ctx.fillStyle = p.color;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * pulseFactor, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fill();
+
+                // Respawn if dead
+                if (p.life <= 0) {
+                    particles.current[i] = createParticle(canvas);
+                }
             });
 
             animationFrame.current = requestAnimationFrame(loop);
         };
-
         loop();
 
         return () => {
             window.removeEventListener("resize", resize);
             cancelAnimationFrame(animationFrame.current);
         };
-    }, [progress, status]); // Re-bind if these change broadly, but refs handle frame-by-frame
+    }, [status]); // Only restart if status changes (e.g. to complete), NOT on charge update
 
-    // --- HANDLERS ---
-    const startSync = () => {
-        if (status === "complete") return;
-        isHolding.current = true;
-        setStatus("syncing");
+    const createParticle = (canvas: HTMLCanvasElement): Particle => {
+        return {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 2 + 1, // Tiny dots
+            color: `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.1})`, // White/Transparent
+            life: Math.random() * 100 + 100,
+        };
     };
 
-    const stopSync = () => {
+    const updateParticle = (p: Particle, w: number, h: number, attracting: boolean, currentCharge: number) => {
+        const centerX = w / 2;
+        const centerY = h / 2;
+
+        if (attracting) {
+            // physics: suck towards center
+            const dx = centerX - p.x;
+            const dy = centerY - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // The closer to 100 charge, the stronger the pull and chaotic energy
+            const force = (currentCharge / 100) * 0.15 + 0.02;
+
+            p.vx += dx * 0.0005 * force;
+            p.vy += dy * 0.0005 * force; // Orbit/Suction feel
+
+            // Color Shift: Blue -> Pink -> Red/Gold as charge increases
+            if (currentCharge > 80) p.color = `rgba(251, 191, 36, 0.8)`; // Gold
+            else if (currentCharge > 50) p.color = `rgba(244, 63, 94, 0.6)`; // Pink/Rose
+            else p.color = `rgba(147, 197, 253, 0.5)`; // Blueish
+
+        } else {
+            // Idle drift
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+        }
+
+        // Apply Velocity
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Friction/Damping logic would go here if needed, but simple is fine
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+    };
+
+    const handleTouchStart = () => {
+        if (status === "complete") return;
+        isHolding.current = true;
+        setStatus("charging");
+        // Haptic feedback?
+        if (navigator.vibrate) navigator.vibrate(50);
+    };
+
+    const handleTouchEnd = () => {
         if (status === "complete") return;
         isHolding.current = false;
         setStatus("idle");
     };
 
-    const handleCompletion = () => {
+    const completeSequence = () => {
         setStatus("complete");
         isHolding.current = false;
+        // Animation handled in render
+    };
 
-        // Explosion Effect (Canvas)
+    const handleExplosionSequence = () => {
+        if (!canvasRef.current || !containerRef.current) return;
         const canvas = canvasRef.current;
-        if (canvas) {
-            particles.current.forEach(p => {
-                const angle = Math.random() * Math.PI * 2;
-                const force = Math.random() * 20 + 10;
-                p.baseX = canvas.width / 2 + Math.cos(angle) * 1000; // Fly off screen
-                p.baseY = canvas.height / 2 + Math.sin(angle) * 1000;
+        const ctx = canvas.getContext("2d");
+
+        // 1. IMPLOSION: Suck all particles to center FAST
+        // We modify the particles array directly
+        particles.current.forEach(p => {
+            // Force velocity towards center
+            const dx = (canvas.width / 2) - p.x;
+            const dy = (canvas.height / 2) - p.y;
+            p.vx = dx * 0.1;
+            p.vy = dy * 0.1;
+            p.life = 100;
+            p.color = "white";
+        });
+
+        // 2. FLASH & EXPLOSION
+        setTimeout(() => {
+            gsap.to(containerRef.current, {
+                backgroundColor: "#fff", // Bright white flash
+                duration: 0.1,
+                yoyo: true,
+                repeat: 1,
+                onComplete: () => {
+                    setShowTicket(true); // Trigger Ticket Reveal
+
+                    // Explosion: Send particles flying OUT
+                    particles.current.forEach(p => {
+                        p.x = canvas.width / 2;
+                        p.y = canvas.height / 2;
+                        p.vx = (Math.random() - 0.5) * 50; // FAST
+                        p.vy = (Math.random() - 0.5) * 50;
+                        p.color = Math.random() > 0.5 ? "rgba(244, 63, 94, 0.8)" : "rgba(251, 191, 36, 0.8)"; // Pink & Gold
+                        p.life = 200;
+                        p.size = Math.random() * 4 + 2;
+                    });
+                }
             });
-        }
+        }, 600); // Wait for implosion to hit center
     };
-
-    const revealDates = () => {
-        setShowDates(true);
-    };
-
 
     return (
         <section
             ref={containerRef}
-            className="relative w-full h-screen bg-[#050505] overflow-hidden select-none touch-none flex flex-col items-center justify-center catch-all-events"
-            onMouseDown={startSync}
-            onMouseUp={stopSync}
-            onTouchStart={startSync}
-            onTouchEnd={stopSync}
-            onMouseLeave={stopSync}
+            className="relative h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden touch-none select-none"
+            onMouseDown={handleTouchStart}
+            onMouseUp={handleTouchEnd}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
         >
-            <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0" />
+            {/* Canvas for Particles */}
+            <canvas ref={canvasRef} className="absolute inset-0 z-0" />
 
-            {/* --- THE NEBULA HEART --- */}
+            {/* --- SCANNER INTERFACE --- */}
             <AnimatePresence>
                 {status !== "complete" && (
                     <motion.div
-                        className="relative z-10 flex flex-col items-center justify-center"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 2, filter: "blur(20px)" }}
-                        transition={{ duration: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative z-10 flex flex-col items-center"
                     >
-                        {/* The Glowing Core */}
-                        <div className="relative">
-                            {/* Inner Core */}
-                            <motion.div
-                                animate={{
-                                    scale: isHolding.current ? [1, 1.2, 1] : [1, 1.05, 1],
-                                    boxShadow: isHolding.current
-                                        ? "0 0 100px rgba(244,63,94,0.6)"
-                                        : "0 0 40px rgba(244,63,94,0.2)"
-                                }}
-                                transition={{
-                                    duration: isHolding.current ? 0.4 : 2, // Faster heartbeat when holding
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                                className="w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-rose-500 via-purple-600 to-black blur-md"
-                            />
+                        {/* Fingerprint Icon Container */}
+                        <div className="relative mb-8 group cursor-pointer">
+                            {/* Pulse Rings */}
+                            {isHolding.current && (
+                                <>
+                                    <motion.div
+                                        animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                        className="absolute inset-0 rounded-full border border-rose-500/50"
+                                    />
+                                    <motion.div
+                                        animate={{ scale: [1, 2], opacity: [0.3, 0] }}
+                                        transition={{ duration: 1, delay: 0.2, repeat: Infinity }}
+                                        className="absolute inset-0 rounded-full border border-rose-500/30"
+                                    />
+                                </>
+                            )}
 
-                            {/* Outer Rings */}
-                            <motion.div
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                                className="absolute inset-0 rounded-full border border-rose-500/20 blur-[1px] scale-110"
+                            {/* Main Icon */}
+                            <Fingerprint
+                                size={80}
+                                className={`transition-colors duration-300 ${isHolding.current ? "text-rose-500" : "text-white/20 animate-pulse"}`}
                             />
-
-                            {/* Instruction Text */}
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <motion.p
-                                    animate={{ opacity: isHolding.current ? 1 : 0.5 }}
-                                    className="text-white/60 font-mono text-xs tracking-[0.3em] uppercase"
-                                >
-                                    {isHolding.current ? "SYNCING..." : "HOLD TO SYNC"}
-                                </motion.p>
-                            </div>
                         </div>
 
-                        {/* Progress Bar (Subtle) */}
-                        {isHolding.current && (
-                            <motion.div
-                                initial={{ width: 0, opacity: 0 }}
-                                animate={{ width: 200, opacity: 1 }}
-                                className="mt-12 h-0.5 bg-white/10 rounded-full overflow-hidden"
-                            >
-                                <motion.div
-                                    className="h-full bg-rose-500 box-shadow-[0_0_10px_rgba(244,63,94,0.8)]"
-                                    style={{ width: `${progress}%` }}
-                                />
-                            </motion.div>
-                        )}
+                        {/* Text Instruction */}
+                        <div className="text-center h-12">
+                            <p className={`text-xs tracking-[0.3em] uppercase transition-all duration-300 ${isHolding.current ? "text-rose-400 font-bold" : "text-white/30"}`}>
+                                {isHolding.current ? "HOLD TO SYNC..." : "INITIATE CONNECTION"}
+                            </p>
+                            {/* Charge Bar (Optional Visual) */}
+                            {isHolding.current && (
+                                <div className="w-32 h-1 bg-white/10 mt-4 rounded-full overflow-hidden mx-auto">
+                                    <div
+                                        className="h-full bg-rose-500 transition-all duration-75 ease-linear"
+                                        style={{ width: `${charge}%` }}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-
-            {/* --- THE REVEAL --- */}
-            {status === "complete" && !showDates && (
+            {/* --- THE REVEAL (Post-Explosion) --- */}
+            {status === "complete" && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 1.5 }}
-                    className="relative z-20 text-center px-4"
+                    transition={{ duration: 1 }}
+                    className="absolute z-20 w-full h-full flex flex-col items-center justify-center pointer-events-none"
                 >
-                    <motion.h2
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="text-white/40 text-sm tracking-[0.5em] uppercase mb-6"
-                    >
-                        Connection Established
-                    </motion.h2>
+                    {/* 1. THE ACTION BUTTON (YES) - Fades out after click */}
+                    <AnimatePresence>
+                        {!showTicket && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0, filter: "blur(20px)" }}
+                                transition={{ duration: 0.5 }}
+                                className="text-center flex flex-col items-center gap-6 px-4 pointer-events-auto"
+                            >
+                                <motion.h2
+                                    className="text-white/60 text-sm md:text-base tracking-[0.4em] uppercase font-light mb-4"
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: 1 }}
+                                >
+                                    Connection Established
+                                </motion.h2>
 
-                    <motion.h1
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.8, type: "spring" }}
-                        className="text-5xl md:text-7xl font-serif text-white mb-12 drop-shadow-[0_0_30px_rgba(244,63,94,0.3)] leading-tight"
-                    >
-                        Will You Be<br />My Valentine?
-                    </motion.h1>
+                                <h1 className="text-5xl md:text-7xl text-white font-serif tracking-tight drop-shadow-[0_0_30px_rgba(251,191,36,0.5)]">
+                                    Will You Be<br />My Valentine?
+                                </h1>
 
-                    <motion.button
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(244,63,94,0.6)" }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ delay: 1.5 }}
-                        onClick={revealDates}
-                        className="px-12 py-5 bg-gradient-to-r from-rose-600 to-rose-500 rounded-full text-white font-bold tracking-[0.2em] shadow-2xl relative overflow-hidden group"
-                    >
-                        <span className="relative z-10">YES, FOREVER</span>
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                    </motion.button>
+                                <div className="flex gap-6 mt-12">
+                                    <motion.button
+                                        whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.6)" }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="px-10 py-4 bg-rose-600 text-white font-bold tracking-widest uppercase text-sm rounded-full shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                                        onClick={handleExplosionSequence}
+                                    >
+                                        Yes, Forever
+                                    </motion.button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* 2. MESSY FLIP CARDS (Reveals after explosion) */}
+                    {showTicket && (
+                        <div className="relative w-full h-screen flex items-center justify-center pointer-events-auto overflow-hidden">
+
+                            {/* Overlay to deselect */}
+                            <div
+                                className={`absolute inset-0 bg-black/80 transition-opacity duration-500 ${selectedCard ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                                onClick={() => setSelectedCard(null)}
+                            />
+
+                            <h2 className={`absolute top-24 md:top-32 text-white/60 text-sm md:text-xl tracking-[0.3em] uppercase font-light text-center transition-opacity duration-500 z-0 ${selectedCard ? "opacity-0" : "opacity-100 delay-1000"}`}>
+                                Choose Your Adventure
+                            </h2>
+
+                            {/* --- CARD 1: STARLIGHT CINEMA --- */}
+                            <FlipCard
+                                id="cinema"
+                                isSelected={selectedCard === "cinema"}
+                                isOtherSelected={selectedCard !== null && selectedCard !== "cinema"}
+                                onClick={() => setSelectedCard(selectedCard === "cinema" ? null : "cinema")}
+                                initialRotation={-6}
+                                initialX={-140}
+                                color="from-indigo-900 to-black"
+                                borderColor="border-indigo-500/50"
+                                icon="🌜"
+                                title="Starlight Cinema"
+                                subtitle="Movie in the Park"
+                                details={{
+                                    time: "8:00 PM",
+                                    location: "Centennial Park",
+                                    note: "Outdoors with people. Blankets, natural breeze, drinks, and chow."
+                                }}
+                                whatsappMessage="I choose the Starlight Cinema! 🌜🍿 Let's watch a movie in the park."
+                            />
+
+                            {/* --- CARD 2: NEON & NOSTALGIA --- */}
+                            <FlipCard
+                                id="car"
+                                isSelected={selectedCard === "car"}
+                                isOtherSelected={selectedCard !== null && selectedCard !== "car"}
+                                onClick={() => setSelectedCard(selectedCard === "car" ? null : "car")}
+                                initialRotation={8}
+                                initialX={140}
+                                color="from-rose-950 to-black"
+                                borderColor="border-rose-500/50"
+                                icon="📸"
+                                title="Neon & Nostalgia"
+                                subtitle="Car Date + Photo Booth"
+                                details={{
+                                    time: "7:30 PM",
+                                    location: "Drive-In & Arcade",
+                                    note: "Bring your craziest photo props! Cool evening, blankets, cool movie, popcorn, food, and much more."
+                                }}
+                                whatsappMessage="I choose Neon & Nostalgia! 📸🚗 Car date and crazy photo booth time!"
+                            />
+
+                        </div>
+                    )}
                 </motion.div>
             )}
-
-
-            {/* --- THE DATE SELECTION (Glassmorphic Portals) --- */}
-            <AnimatePresence>
-                {showDates && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1 }}
-                        className="relative z-30 w-full max-w-6xl mx-auto px-4 pointer-events-auto flex flex-col md:flex-row gap-8 items-center justify-center min-h-[60vh]"
-                    >
-                        {/* Title */}
-                        <motion.h2
-                            initial={{ y: -50, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="absolute top-0 left-0 right-0 text-center text-white/40 text-sm tracking-[0.5em] uppercase hidden md:block"
-                        >
-                            Choose Our Adventure
-                        </motion.h2>
-
-
-                        {/* CARD 1: CINEMA */}
-                        <DatePortal
-                            title="Starlight Cinema"
-                            subtitle="Movie in the Park"
-                            icon="🌜"
-                            gradient="from-indigo-500/10 to-blue-900/10"
-                            border="border-indigo-500/30"
-                            delay={0.2}
-                            details={{
-                                location: "Centennial Park",
-                                time: "8:00 PM",
-                                vibe: "Blankets, stars, and cinema."
-                            }}
-                            onSelect={() => {
-                                window.open(`https://wa.me/1234567890?text=${encodeURIComponent("I choose the Starlight Cinema! 🌜🍿 Let's watch a movie in the park.")}`, '_blank');
-                            }}
-                        />
-
-                        {/* CARD 2: CAR DATE */}
-                        <DatePortal
-                            title="Neon & Nostalgia"
-                            subtitle="Car Date + Photo Booth"
-                            icon="📸"
-                            gradient="from-rose-500/10 to-pink-900/10"
-                            border="border-rose-500/30"
-                            delay={0.4}
-                            details={{
-                                location: "Drive-In & Arcade",
-                                time: "7:30 PM",
-                                vibe: "Cozy car vibes & fun photos."
-                            }}
-                            onSelect={() => {
-                                window.open(`https://wa.me/1234567890?text=${encodeURIComponent("I choose Neon & Nostalgia! 📸🚗 Car date and crazy photo booth time!")}`, '_blank');
-                            }}
-                        />
-
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
         </section>
     );
 }
 
-// --- SUB-COMPONENT: DATE PORTAL ---
-function DatePortal({ title, subtitle, icon, gradient, border, delay, details, onSelect }: any) {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay, duration: 0.8, ease: "easeOut" }}
-            whileHover={{ y: -10, scale: 1.02 }}
-            className={`relative group w-full md:w-[400px] h-[500px] rounded-[30px] border ${border} bg-gradient-to-b ${gradient} backdrop-blur-md overflow-hidden cursor-pointer`}
-            onClick={onSelect}
-        >
-            {/* Hover Glow */}
-            <div className={`absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+// --- FLIP CARD COMPONENT ---
 
-            <div className="relative z-10 p-10 h-full flex flex-col justify-between">
-                <div>
-                    <div className="text-6xl mb-6">{icon}</div>
-                    <h3 className="text-3xl font-serif text-white mb-2 leading-tight">{title}</h3>
-                    <p className="text-white/60 text-sm tracking-wider uppercase">{subtitle}</p>
+interface FlipCardProps {
+    id: string;
+    isSelected: boolean;
+    isOtherSelected: boolean;
+    onClick: () => void;
+    initialRotation: number;
+    initialX: number;
+    color: string;
+    borderColor: string;
+    icon: string;
+    title: string;
+    subtitle: string;
+    details: { time: string; location: string; note: string };
+    whatsappMessage: string;
+}
+
+function FlipCard({
+    isSelected,
+    isOtherSelected,
+    onClick,
+    initialRotation,
+    initialX,
+    color,
+    borderColor,
+    icon,
+    title,
+    subtitle,
+    details,
+    whatsappMessage
+}: FlipCardProps) {
+
+    return (
+        <div
+            className={`absolute transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${isSelected ? "z-50" : "z-10"}`}
+            style={{
+                perspective: "1000px",
+                transform: isSelected
+                    ? "translate(0, 0) rotate(0deg)" // Center
+                    : isOtherSelected
+                        ? `translate(${initialX * 3}px, 1000px) rotate(${initialRotation}deg)` // Fly away
+                        : `translate(${initialX}px, 0) rotate(${initialRotation}deg)` // Messy pile
+            }}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick(); // Trigger Flip
+            }}
+        >
+            <motion.div
+                initial={{ rotateY: 0 }}
+                animate={{ rotateY: isSelected ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
+                className="relative w-[300px] h-[450px] transform-style-3d cursor-pointer"
+                style={{ transformStyle: "preserve-3d" }}
+            >
+                {/* --- FRONT SIDE --- */}
+                <div
+                    className={`absolute inset-0 w-full h-full bg-gradient-to-br ${color} border ${borderColor} backdrop-blur-md rounded-3xl p-6 shadow-2xl flex flex-col justify-between overflow-hidden`}
+                    style={{ backfaceVisibility: "hidden", transformStyle: "preserve-3d" }}
+                >
+                    {/* Texture */}
+                    <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]" />
+                    <div className="absolute top-2 right-4 text-white/20 text-4xl font-serif italic">"{icon}"</div>
+
+                    <div className="mt-12 z-10">
+                        <p className="text-xs text-white/50 tracking-[0.3em] uppercase mb-2">Admit One</p>
+                        <h2 className="text-4xl text-white font-serif italic leading-tight">{title}</h2>
+                    </div>
+
+                    <div className="z-10">
+                        <div className="w-full h-[1px] bg-white/20 mb-4" />
+                        <p className="text-white/80 text-sm font-light uppercase tracking-widest">{subtitle}</p>
+                    </div>
+
+                    <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-white/10 blur-3xl rounded-full pointer-events-none" />
                 </div>
 
-                <div className="space-y-4">
-                    <div className="w-12 h-[1px] bg-white/20" />
-                    <div className="flex justify-between text-xs text-white/50 tracking-widest uppercase">
-                        <span>{details.time}</span>
-                        <span>{details.location}</span>
+                {/* --- BACK SIDE (DETAILS) --- */}
+                <div
+                    className={`absolute inset-0 w-full h-full bg-black/90 border ${borderColor} rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-center text-center`}
+                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", transformStyle: "preserve-3d" }}
+                >
+                    <div className="mb-6">
+                        <span className="text-4xl">{icon}</span>
                     </div>
-                    <p className="text-sm text-white/80 font-light italic leading-relaxed">
-                        "{details.vibe}"
-                    </p>
 
-                    <button className="mt-8 w-full py-4 bg-white/10 hover:bg-white text-white hover:text-black transition-all duration-300 rounded-xl font-bold uppercase text-xs tracking-[0.2em] border border-white/10">
+                    <h3 className="text-xl text-white font-serif mb-6">{title}</h3>
+
+                    <div className="space-y-4 w-full text-sm text-white/70 font-light mb-8">
+                        <div className="flex justify-between border-b border-white/10 pb-2">
+                            <span>Time</span>
+                            <span className="text-white">{details.time}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-white/10 pb-2">
+                            <span>Location</span>
+                            <span className="text-white">{details.location}</span>
+                        </div>
+                        <p className="text-xs italic text-white/50 pt-2 leading-relaxed">
+                            "{details.note}"
+                        </p>
+                    </div>
+
+                    {/* CLAIM BUTTON - Only this triggers WhatsApp */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation(); // Prevent flip
+                            const phone = "1234567890";
+                            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+                        }}
+                        className="w-full py-4 bg-white text-black font-bold tracking-[0.2em] uppercase text-xs rounded-full hover:bg-rose-100 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                    >
                         Claim Date
                     </button>
+
+                    <p className="mt-4 text-[10px] text-white/30 uppercase tracking-widest">Tap outside to close</p>
                 </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </div>
     );
 }

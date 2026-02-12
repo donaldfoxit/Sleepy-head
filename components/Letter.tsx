@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useSpring, useTransform, useMotionValue, AnimatePresence } from "framer-motion";
 
 // --- THE LETTER CONTENT ---
 const LETTER_LINES = [
@@ -13,311 +13,221 @@ const LETTER_LINES = [
     "I wouldn't want to build this universe with anyone else."
 ];
 
-// --- PHYSICS CONSTANTS ---
-const PARTICLE_COUNT = 800; // Stars
-const EASE = 0.05; // Forming text speed
+// --- PETAL COMPONENT ---
+// A single petal that rotates and unfolds based on progress
+const Petal = ({ index, total, progress }: { index: number, total: number, progress: number }) => {
+    // Unique characteristics for each petal layer
+    const layer = Math.floor(index / 5); // 0, 1, 2... concentric layers
+    const angle = (index % 5) * (360 / 5) + (layer * 36); // Offset rotation per layer
+
+    // Animation Transforms
+    // As progress 0 -> 100:
+    // Rotate folds out (X axis)
+    // Scale grows
+    // Z-index shifts
+
+    // Normalize progress 0-1
+    const p = Math.min(progress / 100, 1);
+
+    // Stagger opening based on layer (outer layers open first or last? Let's say inner opens last)
+    const stagger = Math.max(0, p * 1.5 - (0.1 * (3 - layer)));
+    const openFactor = Math.min(stagger, 1);
+
+    return (
+        <motion.div
+            className="absolute origin-bottom-center"
+            style={{
+                width: 60 + layer * 20,
+                height: 100 + layer * 30,
+                rotate: angle, // Static rotation around center
+                rotateX: (1 - openFactor) * 90, // Unfolds from 90deg (closed) to 0deg (open)
+                y: -layer * 10,
+                z: layer,
+                opacity: 0.8 + (layer * 0.05),
+                filter: `hue-rotate(${layer * 10}deg)`
+            }}
+        >
+            <div
+                className="w-full h-full rounded-[50%_50%_10%_10%] bg-gradient-to-t from-rose-900 via-rose-600 to-rose-400 shadow-[0_0_20px_rgba(225,29,72,0.3)] border border-white/10"
+                style={{
+                    clipPath: "polygon(50% 0%, 100% 20%, 80% 100%, 20% 100%, 0% 20%)" // Stylized petal shape
+                }}
+            />
+        </motion.div>
+    );
+};
+
 
 export default function Letter() {
-    const [phase, setPhase] = useState<"void" | "charging" | "exploding" | "universe">("void");
-    const [progress, setProgress] = useState(0); // 0 to 100 for charging
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const requestRef = useRef<number>();
+    const [progress, setProgress] = useState(0); // 0 to 100
+    const [isComplete, setIsComplete] = useState(false);
 
-    // Interaction Refs
+    // Smooth spring for the bloom animation
+    const springProgress = useSpring(0, { stiffness: 50, damping: 20 });
+
     const isHolding = useRef(false);
-    const holdStartTime = useRef(0);
-    const particles = useRef<Particle[]>([]);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const particles = useRef<any[]>([]);
+    const animationFrame = useRef<number>(0);
 
-    // --- PARTICLE CLASS ---
-    class Particle {
-        x: number;
-        y: number;
-        vx: number;
-        vy: number;
-        size: number;
-        color: string;
-        targetX: number | null;
-        targetY: number | null;
-        friction: number;
+    // Sync state to spring
+    useEffect(() => {
+        springProgress.set(progress);
+    }, [progress, springProgress]);
 
-        constructor(w: number, h: number) {
-            this.x = Math.random() * w;
-            this.y = Math.random() * h;
-            this.vx = (Math.random() - 0.5) * 0.5;
-            this.vy = (Math.random() - 0.5) * 0.5;
-            this.size = Math.random() * 2 + 0.5;
+    // --- INTERACTION LOOP ---
+    useEffect(() => {
+        const loop = setInterval(() => {
+            if (isComplete) return;
 
-            // Random Star Colors
-            const colors = ["#ffffff", "#ffecd1", "#ffe4e1", "#b0e0e6", "#ffd700"];
-            this.color = colors[Math.floor(Math.random() * colors.length)];
-
-            this.targetX = null;
-            this.targetY = null;
-            this.friction = 0.98;
-        }
-
-        update(w: number, h: number, currentPhase: string, holdFactor: number) {
-            const cx = w / 2;
-            const cy = h / 2;
-
-            if (currentPhase === "charging") {
-                // SUCK INTO CENTER
-                const dx = cx - this.x;
-                const dy = cy - this.y;
-                // Stronger pull as holdFactor increases
-                const pullStrength = 0.05 * (holdFactor / 100);
-
-                this.vx += dx * pullStrength;
-                this.vy += dy * pullStrength;
-                this.vx *= 0.9;
-                this.vy *= 0.9;
-
-            } else if (currentPhase === "exploding") {
-                // BIG BANG: Handled by initial burst, just friction here
-                this.vx *= this.friction;
-                this.vy *= this.friction;
-
-            } else if (currentPhase === "universe") {
-                // FLOAT / ORBIT
-                if (this.targetX !== null && this.targetY !== null) {
-                    // Form Text (if target set - future feature or subtle background shape)
-                    // For now, let's keep them drifting to form a galaxy, maybe targeted later?
-                    // Actually, let's just let them drift in universe mode for readability
-                    this.vx += (Math.random() - 0.5) * 0.02;
-                    this.vy += (Math.random() - 0.5) * 0.02;
-                } else {
-                    // Drift
-                    this.vx += (Math.random() - 0.5) * 0.02;
-                    this.vy += (Math.random() - 0.5) * 0.02;
-                }
+            if (isHolding.current) {
+                setProgress(p => Math.min(p + 0.4, 100)); // Charge up
             } else {
-                // VOID: Gentle float
-                this.vx += (Math.random() - 0.5) * 0.01;
-                this.vy += (Math.random() - 0.5) * 0.01;
+                setProgress(p => Math.max(p - 0.5, 0)); // Decay if released
             }
+        }, 16); // ~60fps
 
-            this.x += this.vx;
-            this.y += this.vy;
+        return () => clearInterval(loop);
+    }, [isComplete]);
 
-            // Screen Wrap (only in void/universe if not text forming)
-            if (this.targetX === null) {
-                if (this.x < 0) this.x = w;
-                if (this.x > w) this.x = 0;
-                if (this.y < 0) this.y = h;
-                if (this.y > h) this.y = 0;
-            }
-        }
+    useEffect(() => {
+        if (progress >= 100) setIsComplete(true);
+    }, [progress]);
 
-        draw(ctx: CanvasRenderingContext2D) {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.shadowBlur = this.size * 2;
-            ctx.shadowColor = this.color;
-            ctx.fill();
-        }
-    }
 
-    // --- INITIALIZATION ---
+    // --- PARTICLE SYSTEM (Embers) ---
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        let w = canvas.width = window.innerWidth;
-        let h = canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
         // Init Particles
-        if (particles.current.length === 0) {
-            particles.current = Array.from({ length: PARTICLE_COUNT }, () => new Particle(w, h));
+        for (let i = 0; i < 100; i++) {
+            particles.current.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vy: -Math.random() * 1 - 0.2, // Float up
+                size: Math.random() * 2,
+                opacity: Math.random() * 0.5
+            });
         }
 
-        const animate = () => {
-            // Clear
-            ctx.fillStyle = "rgba(5, 5, 10, 0.3)"; // Trails
-            if (phase === "exploding") ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; // Flash effect fade
-            ctx.fillRect(0, 0, w, h);
+        const render = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#fff";
 
-            // Update Logic
-            if (isHolding.current && phase === "charging") {
-                const heldTime = Date.now() - holdStartTime.current;
-                const newProgress = Math.min((heldTime / 2000) * 100, 100); // 2s to charge
-                setProgress(newProgress);
-
-                if (newProgress >= 100) {
-                    triggerBigBang(w, h); // Pass dimensions
-                }
-            } else if (!isHolding.current && phase === "charging") {
-                // Decay if released early
-                setProgress(p => Math.max(p - 2, 0));
-            }
-
-            // Draw Particles
             particles.current.forEach(p => {
-                p.update(w, h, phase, progress);
-                p.draw(ctx);
+                p.y += p.vy;
+                if (p.y < 0) p.y = canvas.height; // Wrap
+
+                // Draw
+                ctx.globalAlpha = p.opacity;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
             });
-
-            requestRef.current = requestAnimationFrame(animate);
+            ctx.globalAlpha = 1;
+            animationFrame.current = requestAnimationFrame(render);
         };
+        render();
 
-        requestRef.current = requestAnimationFrame(animate);
-
-        const handleResize = () => {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        };
-        window.addEventListener("resize", handleResize);
-
-        return () => {
-            if (requestRef.current) cancelAnimationFrame(requestRef.current);
-            window.removeEventListener("resize", handleResize);
-        };
-    }, [phase, progress]);
+        return () => cancelAnimationFrame(animationFrame.current);
+    }, []);
 
     // --- HANDLERS ---
+    const startObj = () => { isHolding.current = true; };
+    const endObj = () => { isHolding.current = false; };
 
-    const startCharge = () => {
-        if (phase !== "void" && phase !== "charging") return;
-        setPhase("charging");
-        isHolding.current = true;
-        holdStartTime.current = Date.now();
-    };
-
-    const endCharge = () => {
-        if (phase !== "charging") return;
-        isHolding.current = false;
-        if (progress < 100) {
-            // Reset to void if failed
-            if (progress < 10) setPhase("void"); // Only reset if barely touched
-        }
-    };
-
-    const triggerBigBang = (w: number, h: number) => {
-        setPhase("exploding");
-        isHolding.current = false;
-
-        // EXPLOSION PHYSICS
-        particles.current.forEach(p => {
-            const angle = Math.random() * Math.PI * 2;
-            const force = Math.random() * 50 + 20; // Massive speed
-            p.vx = Math.cos(angle) * force;
-            p.vy = Math.sin(angle) * force;
-        });
-
-        // Transition to Universe/Text after explosion settles
-        setTimeout(() => {
-            setPhase("universe");
-        }, 2000);
-    };
 
     return (
         <section
-            className="relative w-full h-screen bg-[#05050a] overflow-hidden cursor-crosshair select-none touch-none"
-            onMouseDown={startCharge}
-            onMouseUp={endCharge}
-            onTouchStart={startCharge}
-            onTouchEnd={endCharge}
-            onMouseLeave={endCharge}
+            className="relative w-full min-h-screen bg-[#020102] overflow-hidden flex flex-col items-center justify-center select-none"
+            onMouseDown={startObj}
+            onMouseUp={endObj}
+            onTouchStart={startObj}
+            onTouchEnd={endObj}
+            onMouseLeave={endObj}
         >
-            <canvas ref={canvasRef} className="absolute inset-0 z-10 block" />
+            <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-50" />
 
-            {/* --- UI OVERLAY --- */}
+            {/* --- INSTRUCTION --- */}
             <AnimatePresence>
-
-                {/* 1. VOID INSTRUCTION */}
-                {phase === "void" && (
+                {!isComplete && progress < 10 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+                        className="absolute bottom-20 text-center pointer-events-none"
                     >
-                        <div className="text-center">
-                            <p className="text-white/30 font-mono text-xs tracking-[0.5em] uppercase animate-pulse">
-                                Touch & Hold to Create
-                            </p>
-                        </div>
+                        <p className="text-rose-200/40 text-xs tracking-[0.4em] uppercase animate-pulse">
+                            Touch & Hold to Bloom
+                        </p>
                     </motion.div>
                 )}
-
-                {/* 2. CHARGING FEEDBACK */}
-                {phase === "charging" && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                        {/* Shaking Text */}
-                        <motion.div
-                            animate={{
-                                x: [0, -5, 5, -5, 5, 0],
-                                filter: [`blur(0px)`, `blur(${progress / 20}px)`]
-                            }}
-                            transition={{ duration: 0.2, repeat: Infinity }}
-                        >
-                            <p className="text-white font-bold text-4xl md:text-6xl tracking-widest uppercase opacity-80"
-                                style={{ textShadow: `0 0 ${progress}px white` }}>
-                                {Math.floor(progress)}%
-                            </p>
-                        </motion.div>
-                    </div>
-                )}
-
-                {/* 3. UNIVERSE / LETTER CONTENT */}
-                {phase === "universe" && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 2, delay: 1 }}
-                        className="absolute inset-0 z-30 overflow-y-auto"
-                    >
-                        <div className="min-h-screen flex flex-col items-center justify-center py-20 px-6">
-
-                            {/* The "Constellation" Header */}
-                            <motion.h1
-                                initial={{ opacity: 0, scale: 2, filter: "blur(20px)" }}
-                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                                transition={{ duration: 2, ease: "easeOut" }}
-                                className="text-5xl md:text-7xl font-serif text-transparent bg-clip-text bg-gradient-to-b from-white to-rose-200 text-center mb-16 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
-                                style={{ fontFamily: "serif" }}
-                            >
-                                The Beginning
-                            </motion.h1>
-
-                            {/* Letter Lines */}
-                            <div className="space-y-12 max-w-2xl text-center">
-                                {LETTER_LINES.map((line, i) => (
-                                    <motion.p
-                                        key={i}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: 2 + (i * 0.8), duration: 1 }}
-                                        className="text-white/80 font-serif text-xl md:text-3xl leading-relaxed"
-                                    >
-                                        {line}
-                                    </motion.p>
-                                ))}
-                            </div>
-
-                            {/* Final Signature */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                whileInView={{ opacity: 1 }}
-                                transition={{ delay: 6, duration: 1.5 }}
-                                className="mt-24"
-                            >
-                                <p className="text-white/40 font-mono text-xs tracking-widest uppercase mb-4 text-center">
-                                    EST. 2024
-                                </p>
-                                <div className="text-rose-500 font-serif italic text-4xl">
-                                    Your Name
-                                </div>
-                            </motion.div>
-
-                        </div>
-                    </motion.div>
-                )}
-
             </AnimatePresence>
+
+            {/* --- THE ROSE CONTAINER --- */}
+            <div className={`relative z-10 w-64 h-64 md:w-96 md:h-96 flex items-center justify-center transition-all duration-1000 ${isComplete ? 'blur-sm scale-110 opacity-20' : ''}`}>
+                <div className="relative w-full h-full preserve-3d flex items-center justify-center" style={{ transformStyle: "preserve-3d", perspective: "800px" }}>
+                    {/* CORE GLOW */}
+                    <motion.div
+                        className="absolute w-20 h-20 bg-rose-500 rounded-full blur-[50px]"
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                    />
+
+                    {/* Generate Procedural Petals */}
+                    {/* Layer 1 (Inner) */}
+                    {[...Array(5)].map((_, i) => <Petal key={`l1-${i}`} index={i} total={5} progress={progress} />)}
+                    {/* Layer 2 */}
+                    {[...Array(5)].map((_, i) => <Petal key={`l2-${i}`} index={i + 5} total={5} progress={progress} />)}
+                    {/* Layer 3 (Outer) */}
+                    {[...Array(6)].map((_, i) => <Petal key={`l3-${i}`} index={i + 10} total={6} progress={progress} />)}
+
+                </div>
+            </div>
+
+            {/* --- THE LETTER CONTENT (REVEAL) --- */}
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+                <div className="max-w-xl text-center px-6">
+                    {LETTER_LINES.map((line, i) => {
+                        // Show line based on progress milestones
+                        const lineTrigger = (i + 1) * (100 / (LETTER_LINES.length + 1));
+                        const isVisible = progress > lineTrigger;
+
+                        return (
+                            <motion.p
+                                key={i}
+                                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                                animate={{
+                                    opacity: isVisible ? 1 : 0,
+                                    y: isVisible ? 0 : 20,
+                                    filter: isVisible ? "blur(0px)" : "blur(10px)"
+                                }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                className="text-white/90 font-serif text-xl md:text-3xl leading-relaxed mb-6 drop-shadow-lg"
+                            >
+                                {line}
+                            </motion.p>
+                        );
+                    })}
+                </div>
+
+                {/* FINAL SIGNATURE */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: isComplete ? 1 : 0 }}
+                    transition={{ delay: 0.5, duration: 1 }}
+                    className="mt-12"
+                >
+                    <p className="text-rose-500 font-serif italic text-2xl">Forever Yours.</p>
+                </motion.div>
+            </div>
+
         </section>
     );
 }
