@@ -41,18 +41,19 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
             playerRef.current = new window.YT.Player('bg-music-player', {
                 height: '0',
                 width: '0',
-                videoId: 'Fj79P_YxP14',
+                videoId: '3lHbd8jQUSk',
                 playerVars: {
                     'autoplay': 0, // Don't autoplay immediately on load
                     'controls': 0,
                     'loop': 1,
-                    'playlist': 'CwtrzMn1BzE',
+                    'playlist': '3lHbd8jQUSk', // Loop single video
                     'playsinline': 1,
                 },
                 events: {
                     'onReady': (event: any) => {
                         // Check strict ref value to avoid closure staleness
                         if (shouldPlayRef.current) {
+                            event.target.setVolume(50); // Set to 50% volume
                             event.target.playVideo();
                             hasStartedRef.current = true;
                         }
@@ -62,8 +63,8 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
         };
 
         return () => {
-            if (playerRef.current) {
-                // optional cleanup
+            if (playerRef.current && playerRef.current.destroy) {
+                playerRef.current.destroy(); // Proper cleanup to stop old tracks
             }
         };
     }, []);
@@ -79,7 +80,7 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
         if (hasStartedRef.current) return;
 
         if (playerRef.current && playerRef.current.playVideo) {
-            playerRef.current.setVolume(25); // Slightly higher volume
+            playerRef.current.setVolume(50); // Set to 50% volume
             playerRef.current.playVideo();
             hasStartedRef.current = true;
         }

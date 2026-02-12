@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import RadioVisualizer from "@/components/RadioVisualizer";
@@ -17,6 +17,31 @@ export default function Hero() {
 
     const yText = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
     const opacityText = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+    // Play Overlay Voice Note on Mount
+    useEffect(() => {
+        const audio = new Audio("/ameen-intro.wav?v=" + Date.now());
+        audio.volume = 1.0; // Ensure it's audible over background music
+
+        const playAudio = async () => {
+            try {
+                await audio.play();
+                console.log("Overlay voice note playing");
+            } catch (err) {
+                console.error("Overlay voice note play failed (interaction required?):", err);
+            }
+        };
+
+        playAudio();
+
+        // Cleanup: Fade out or stop? User said "PLAY IMMEDIATELY", didn't imply looking at it forever.
+        // It's a voice note, so let it finish. 
+        // But if component unmounts (nav away), silence it.
+        return () => {
+            audio.pause();
+            audio.currentTime = 0;
+        };
+    }, []);
 
     return (
         <section
