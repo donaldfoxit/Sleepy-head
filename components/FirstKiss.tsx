@@ -9,7 +9,7 @@ export default function FirstKiss() {
 
             {/* Import Tech Font */}
             <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Pinyon+Script&display=swap');
             `}</style>
 
             {/* Background Atmosphere */}
@@ -99,15 +99,18 @@ export default function FirstKiss() {
                         whileInView={{ opacity: 1, scale: 1, x: 0, rotate: -15 }}
                         transition={{ duration: 0.8, delay: 0.6, type: "spring", bounce: 0.5 }}
                         viewport={{ once: true }}
-                        className="absolute -bottom-8 -left-12 md:-left-20 z-20 pointer-events-none"
+                        className="absolute -bottom-20 -left-16 md:-left-32 z-20 pointer-events-none flex flex-col items-center"
                     >
-                        <div className="text-[80px] md:text-[120px] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] animate-pulse-slow">
+                        <div className="text-[120px] md:text-[180px] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] animate-pulse-slow leading-none">
                             💋
                         </div>
+                        <p className="text-white/60 text-lg md:text-2xl -mt-4 rotate-[-10deg] whitespace-nowrap drop-shadow-md" style={{ fontFamily: "'Pinyon Script', cursive" }}>
+                            i wanted to remember
+                        </p>
                     </motion.div>
                 </div>
 
             </div>
-        </section>
+        </section >
     );
 }
