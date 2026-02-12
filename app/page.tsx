@@ -9,6 +9,7 @@ import Hero from "@/components/Hero";
 import Gallery from "@/components/Gallery";
 import FilmReel from "@/components/FilmReel";
 import Letter from "@/components/Letter";
+import FirstKiss from "@/components/FirstKiss";
 import SpotifyScanner from "@/components/SpotifyScanner";
 import Stargazer from "@/components/Stargazer";
 import Manifesto from "@/components/Manifesto";
@@ -81,6 +82,9 @@ export default function Home() {
 
                     {/* 7. FILM REEL (The History - Timeline) */}
                     <FilmReel />
+
+                    {/* 7.5. FIRST KISS (Dedicated Memory Screen) */}
+                    <FirstKiss />
 
                     {/* 8. LETTER (The Finale - Emotional Climax) */}
                     <Letter />
