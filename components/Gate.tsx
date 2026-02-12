@@ -9,6 +9,7 @@ import gsap from "gsap";
 export default function Gate() {
     const [input, setInput] = useState("");
     const [error, setError] = useState(false);
+    const [success, setSuccess] = useState(false); // Track success animation
     const setIsUnlocked = useStore((state) => state.setIsUnlocked);
 
     // --- CONFIGURATION ---
@@ -27,45 +28,13 @@ export default function Gate() {
             // --- SUCCESS SEQUENCE ---
             playSuccessSound();
 
-            // 1. Create the Brush Overlay Container
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position: fixed; inset: 0; z-index: 9999; pointer-events: none; transform: translateX(-120%); display: flex; align-items: stretch;';
+            // 1. Trigger Success State (Explosion & Fade)
+            setSuccess(true);
 
-            // The "Ink" Body (Solid Black)
-            const ink = document.createElement('div');
-            ink.style.cssText = 'background: #000; flex: 1; min-width: 100vw;';
-
-            // The "Brush Edge" (Jagged SVG Texture)
-            const edge = document.createElement('div');
-            // We use a background image for the jagged edge
-            edge.style.cssText = 'width: 100px; background-color: transparent; background-image: url("data:image/svg+xml,%3Csvg viewBox=\'0 0 100 1000\' preserveAspectRatio=\'none\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M50,0 C20,50 80,100 30,150 C70,200 10,250 60,300 C20,350 80,400 30,450 C70,500 20,550 60,600 C10,650 80,700 30,750 C70,800 20,850 60,900 C10,950 80,1000 50,1000H0V0Z\' fill=\'%23000\'/%3E%3C/svg%3E"); background-size: 100% 100%; margin-left: -1px;';
-
-            // Append: Ink is on the LEFT, Edge is on the RIGHT.
-            overlay.appendChild(ink);
-            overlay.appendChild(edge);
-
-            document.body.appendChild(overlay);
-
-            // 2. Animate WIPE ACROSS
-            const timeline = gsap.timeline({
-                onComplete: () => overlay.remove()
-            });
-
-            timeline
-                .to(overlay, {
-                    x: "0%", // Move to cover screen (Center)
-                    duration: 0.8, // Slightly faster swipe
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                        setIsUnlocked(true); // Unlock while covered
-                    }
-                })
-                .to(overlay, {
-                    x: "120%", // Move off to the right
-                    duration: 0.8,
-                    ease: "power2.inOut",
-                    delay: 0.1
-                });
+            // 2. Wait for explosion/fade, then Unlock
+            setTimeout(() => {
+                setIsUnlocked(true);
+            }, 2000); // Wait for the magic to happen
 
         } else {
             setError(true);
@@ -74,7 +43,11 @@ export default function Gate() {
     };
 
     return (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black overflow-hidden">
+        <motion.div
+            className="fixed inset-0 z-[90] flex items-center justify-center bg-black overflow-hidden"
+            animate={{ opacity: success ? 0 : 1 }}
+            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5 }} // Smooth fade out after sparkles
+        >
 
             {/* --- TEXTURES (Matching Hero) --- */}
             <div className="absolute inset-0 z-0">
@@ -85,12 +58,43 @@ export default function Gate() {
                 <div className="absolute inset-0 opacity-[0.07] pointer-events-none"
                     style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
                 />
-
-                {/* Stardust */}
-                <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-screen"
-                    style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")' }}
-                />
             </div>
+
+            {/* --- SUCCESS SPARKLE EXPLOSION --- */}
+            {success && (
+                <div className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center">
+                    {[...Array(50)].map((_, i) => (
+                        <motion.div
+                            key={`explode-${i}`}
+                            initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                            animate={{
+                                scale: [0, Math.random() * 2 + 1, 0],
+                                x: (Math.random() - 0.5) * window.innerWidth * 1.5,
+                                y: (Math.random() - 0.5) * window.innerHeight * 1.5,
+                                opacity: [1, 1, 0]
+                            }}
+                            transition={{
+                                duration: Math.random() * 1.5 + 1,
+                                ease: "easeOut"
+                            }}
+                            className="absolute rounded-full"
+                            style={{
+                                width: Math.random() * 6 + 2 + "px",
+                                height: Math.random() * 6 + 2 + "px",
+                                background: Math.random() > 0.5 ? '#fbbf24' : '#f43f5e', // Gold & Rose
+                                boxShadow: "0 0 15px currentColor"
+                            }}
+                        />
+                    ))}
+                    {/* Central Flash */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: [0, 1, 0], scale: [0, 2, 3] }}
+                        transition={{ duration: 0.8 }}
+                        className="absolute w-full h-full bg-white rounded-full blur-3xl mix-blend-overlay"
+                    />
+                </div>
+            )}
 
             <div className="relative z-10 w-full max-w-md px-6">
 
@@ -200,6 +204,6 @@ export default function Gate() {
                     </motion.p>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 }
