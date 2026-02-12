@@ -139,7 +139,16 @@ export default function QuantumTouch() {
             // Idle drift
             p.x += p.vx;
             p.y += p.vy;
-            p.life--;
+
+            // If life is infinite (99999), apply twinkle effect
+            if (p.life > 90000) {
+                // Twinkle: Randomly change opacity/size slightly
+                if (Math.random() > 0.9) {
+                    p.size = Math.random() * 3 + 1;
+                }
+            } else {
+                p.life--;
+            }
         }
 
         // Apply Velocity
@@ -208,6 +217,20 @@ export default function QuantumTouch() {
                         p.life = 200;
                         p.size = Math.random() * 4 + 2;
                     });
+
+                    // 3. SPAWN PERMANENT GLITTER
+                    // Add 100 new "Sparkle" particles that just twinkle
+                    for (let i = 0; i < 150; i++) {
+                        particles.current.push({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            vx: (Math.random() - 0.5) * 0.5,
+                            vy: (Math.random() - 0.5) * 0.5,
+                            size: Math.random() * 3,
+                            color: Math.random() > 0.5 ? "rgba(255, 215, 0, 0.8)" : "rgba(255, 255, 255, 0.8)", // Gold & White
+                            life: 99999, // Live forever
+                        });
+                    }
                 }
             });
         }, 600); // Wait for implosion to hit center
