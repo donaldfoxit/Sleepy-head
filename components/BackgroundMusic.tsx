@@ -41,7 +41,7 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
             playerRef.current = new window.YT.Player('bg-music-player', {
                 height: '0',
                 width: '0',
-                videoId: 'CwtrzMn1BzE',
+                videoId: 'Fj79P_YxP14',
                 playerVars: {
                     'autoplay': 0, // Don't autoplay immediately on load
                     'controls': 0,

@@ -1,232 +1,218 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, useSpring, useTransform, useMotionValue, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// --- THE LETTER CONTENT ---
-const LETTER_LINES = [
+// --- CONTENT ---
+const LETTER_CONTENT = [
     "I’ve been thinking about us...",
     "About how you make the ordinary feel like magic.",
     "You are my favorite notification,",
     "My safe space,",
     "And my greatest adventure.",
-    "I wouldn't want to build this universe with anyone else."
+    "I wouldn't want to build this universe with anyone else.",
+    "Forever Yours."
 ];
 
-// --- PETAL COMPONENT ---
-// A single petal that rotates and unfolds based on progress
-const Petal = ({ index, total, progress }: { index: number, total: number, progress: number }) => {
-    // Unique characteristics for each petal layer
-    const layer = Math.floor(index / 5); // 0, 1, 2... concentric layers
-    const angle = (index % 5) * (360 / 5) + (layer * 36); // Offset rotation per layer
-
-    // Animation Transforms
-    // As progress 0 -> 100:
-    // Rotate folds out (X axis)
-    // Scale grows
-    // Z-index shifts
-
-    // Normalize progress 0-1
-    const p = Math.min(progress / 100, 1);
-
-    // Stagger opening based on layer (outer layers open first or last? Let's say inner opens last)
-    const stagger = Math.max(0, p * 1.5 - (0.1 * (3 - layer)));
-    const openFactor = Math.min(stagger, 1);
-
-    return (
-        <motion.div
-            className="absolute origin-bottom-center"
-            style={{
-                width: 60 + layer * 20,
-                height: 100 + layer * 30,
-                rotate: angle, // Static rotation around center
-                rotateX: (1 - openFactor) * 90, // Unfolds from 90deg (closed) to 0deg (open)
-                y: -layer * 10,
-                z: layer,
-                opacity: 0.8 + (layer * 0.05),
-                filter: `hue-rotate(${layer * 10}deg)`
-            }}
-        >
-            <div
-                className="w-full h-full rounded-[50%_50%_10%_10%] bg-gradient-to-t from-rose-900 via-rose-600 to-rose-400 shadow-[0_0_20px_rgba(225,29,72,0.3)] border border-white/10"
-                style={{
-                    clipPath: "polygon(50% 0%, 100% 20%, 80% 100%, 20% 100%, 0% 20%)" // Stylized petal shape
-                }}
-            />
-        </motion.div>
-    );
-};
-
-
 export default function Letter() {
-    const [progress, setProgress] = useState(0); // 0 to 100
-    const [isComplete, setIsComplete] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const [view, setView] = useState<"envelope" | "memory" | "letter">("envelope");
 
-    // Smooth spring for the bloom animation
-    const springProgress = useSpring(0, { stiffness: 50, damping: 20 });
-
-    const isHolding = useRef(false);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const particles = useRef<any[]>([]);
-    const animationFrame = useRef<number>(0);
-
-    // Sync state to spring
-    useEffect(() => {
-        springProgress.set(progress);
-    }, [progress, springProgress]);
-
-    // --- INTERACTION LOOP ---
-    useEffect(() => {
-        const loop = setInterval(() => {
-            if (isComplete) return;
-
-            if (isHolding.current) {
-                setProgress(p => Math.min(p + 0.4, 100)); // Charge up
-            } else {
-                setProgress(p => Math.max(p - 0.5, 0)); // Decay if released
-            }
-        }, 16); // ~60fps
-
-        return () => clearInterval(loop);
-    }, [isComplete]);
-
-    useEffect(() => {
-        if (progress >= 100) setIsComplete(true);
-    }, [progress]);
-
-
-    // --- PARTICLE SYSTEM (Embers) ---
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Init Particles
-        for (let i = 0; i < 100; i++) {
-            particles.current.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vy: -Math.random() * 1 - 0.2, // Float up
-                size: Math.random() * 2,
-                opacity: Math.random() * 0.5
-            });
+    const handleOpen = () => {
+        if (!isOpen) {
+            setIsOpen(true);
+            setTimeout(() => setView("memory"), 800); // Show memory card after open
         }
+    };
 
-        const render = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#fff";
-
-            particles.current.forEach(p => {
-                p.y += p.vy;
-                if (p.y < 0) p.y = canvas.height; // Wrap
-
-                // Draw
-                ctx.globalAlpha = p.opacity;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-            animationFrame.current = requestAnimationFrame(render);
-        };
-        render();
-
-        return () => cancelAnimationFrame(animationFrame.current);
-    }, []);
-
-    // --- HANDLERS ---
-    const startObj = () => { isHolding.current = true; };
-    const endObj = () => { isHolding.current = false; };
-
+    const handleNext = () => {
+        setView("letter");
+    };
 
     return (
-        <section
-            className="relative w-full min-h-screen bg-[#020102] overflow-hidden flex flex-col items-center justify-center select-none"
-            onMouseDown={startObj}
-            onMouseUp={endObj}
-            onTouchStart={startObj}
-            onTouchEnd={endObj}
-            onMouseLeave={endObj}
-        >
-            <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none opacity-50" />
+        <section className="relative w-full h-screen bg-[#1a1a1a] flex items-center justify-center overflow-hidden font-sans select-none">
 
-            {/* --- INSTRUCTION --- */}
+            {/* Import Handwriting Font */}
+            <style jsx global>{`
+                @import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Share+Tech+Mono&display=swap');
+            `}</style>
+
+            {/* Background Texture */}
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/leather.png')]" />
+
+            <div className="relative z-10 perspective-1000">
+                <AnimatePresence mode="wait">
+
+                    {/* --- 1. THE ENVELOPE --- */}
+                    {view === "envelope" && (
+                        <motion.div
+                            key="envelope"
+                            initial={{ opacity: 0, y: 50, rotateX: 20 }}
+                            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                            exit={{ opacity: 0, scale: 1.5, rotateX: -20 }}
+                            transition={{ duration: 0.8 }}
+                            className="relative w-[320px] h-[220px] md:w-[400px] md:h-[280px] bg-[#fdfbf7] shadow-2xl rounded-sm cursor-pointer group"
+                            onClick={handleOpen}
+                        >
+                            {/* Flap */}
+                            <motion.div
+                                className="absolute top-0 left-0 w-full h-1/2 bg-[#f2efe9] origin-top z-20 shadow-md"
+                                style={{ clipPath: "polygon(0 0, 50% 100%, 100% 0)" }}
+                                animate={{ rotateX: isOpen ? 180 : 0 }}
+                                transition={{ duration: 0.6, ease: "easeInOut" }}
+                            />
+
+                            {/* Envelope Body */}
+                            <div className="absolute bottom-0 left-0 w-full h-full border-t-[20px] border-[#fdfbf7] z-10 bg-[#fdfbf7]"
+                                style={{ clipPath: "polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%)" }}
+                            />
+
+                            {/* Wax Seal */}
+                            <motion.div
+                                animate={{ opacity: isOpen ? 0 : 1, scale: isOpen ? 1.5 : 1 }}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
+                            >
+                                <div className="w-16 h-16 bg-rose-700 rounded-full flex items-center justify-center shadow-lg border-2 border-rose-800">
+                                    <div className="text-2xl text-rose-900 filter drop-shadow-md">❤</div>
+                                </div>
+                            </motion.div>
+
+                            {/* Hint Text */}
+                            {!isOpen && (
+                                <motion.p
+                                    className="absolute -bottom-12 w-full text-center text-white/30 text-xs tracking-[0.3em] uppercase"
+                                    animate={{ opacity: [0.3, 0.7, 0.3] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                    Tap to Open
+                                </motion.p>
+                            )}
+                        </motion.div>
+                    )}
+
+
+                    {/* --- 2. THE MEMORY (DASHBOARD) --- */}
+                    {view === "memory" && (
+                        <motion.div
+                            key="memory"
+                            initial={{ opacity: 0, y: 100, rotate: -5 }}
+                            animate={{ opacity: 1, y: 0, rotate: -2 }}
+                            exit={{ opacity: 0, x: -100, rotate: -15 }}
+                            transition={{ duration: 0.8, type: "spring" }}
+                            className="relative w-[340px] h-[240px] md:w-[420px] md:h-[300px] bg-black border-4 border-white/10 rounded-xl shadow-2xl overflow-hidden cursor-pointer"
+                            onClick={handleNext}
+                        >
+                            {/* Polaroid Frame / Card Paper */}
+                            <div className="absolute inset-0 bg-[#111] p-4 flex flex-col justify-between font-mono relative">
+                                {/* The "Screen" Glow */}
+                                <div className="absolute inset-0 bg-red-900/5 pointer-events-none" />
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 blur-[50px] rounded-full pointer-events-none" />
+
+                                {/* Top Bar */}
+                                <div className="flex justify-between items-start z-10">
+                                    <div className=" bg-red-600/20 px-2 py-1 rounded text-[10px] text-red-500 tracking-wider">
+                                        BT Audio
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-4xl md:text-5xl text-red-600 font-bold tracking-tighter drop-shadow-[0_0_10px_rgba(220,38,38,0.8)]" style={{ fontFamily: "'Share Tech Mono', monospace" }}>
+                                            11:56<span className="text-lg align-top ml-1">PM</span>
+                                        </div>
+                                        <div className="text-red-800/80 text-xs tracking-widest mt-1">FEB 11 2026</div>
+                                    </div>
+                                </div>
+
+                                {/* Center Track Info */}
+                                <div className="z-10 mt-4">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-8 h-8 bg-red-900/40 rounded flex items-center justify-center">
+                                            <span className="text-red-500 text-xs">♫</span>
+                                        </div>
+                                        <div className="h-[2px] w-20 bg-red-800/30" />
+                                    </div>
+                                    <div className="text-red-500 text-lg md:text-xl font-bold tracking-wide uppercase truncate">
+                                        James Smith
+                                    </div>
+                                    <div className="text-red-400/80 text-sm tracking-widest uppercase">
+                                        Little Love
+                                    </div>
+                                </div>
+
+                                {/* Bottom Controls Visual */}
+                                <div className="z-10 mt-auto">
+                                    <div className="w-full h-1 bg-red-900/20 rounded-full mb-2 overflow-hidden">
+                                        <div className="w-1/3 h-full bg-red-600/60" />
+                                    </div>
+                                    <div className="flex justify-between text-[10px] text-red-800/60 font-sans">
+                                        <span>0:42</span>
+                                        <span>3:15</span>
+                                    </div>
+                                </div>
+
+                                {/* Handwritten Note Overlay */}
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                    animate={{ opacity: 1, scale: 1, rotate: -5 }}
+                                    transition={{ delay: 1 }}
+                                    className="absolute bottom-6 right-4 rotate-[-5deg] z-20"
+                                >
+                                    <p className="text-white text-3xl md:text-4xl drop-shadow-lg" style={{ fontFamily: "'Pinyon Script', cursive" }}>
+                                        Our First Kiss <span className="text-2xl filter drop-shadow">💋</span>
+                                    </p>
+                                </motion.div>
+                            </div>
+                        </motion.div>
+                    )}
+
+
+                    {/* --- 3. THE HANDWRITTEN LETTER --- */}
+                    {view === "letter" && (
+                        <motion.div
+                            key="letter"
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.3 }}
+                            className="relative w-full max-w-lg p-8 md:p-12 bg-[#f4f1ea] shadow-[0_0_50px_rgba(0,0,0,0.5)] rounded-sm rotate-1"
+                        >
+                            {/* Paper Texture */}
+                            <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]" />
+
+                            <div className="relative z-10 text-[#2c2222]">
+                                <div className="mb-8 text-right opacity-60 font-serif text-sm italic">
+                                    EST. 11.02.2026
+                                </div>
+
+                                {LETTER_CONTENT.map((line, i) => (
+                                    <motion.p
+                                        key={i}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.5 + i * 1.5, duration: 1 }} // Slow reveal
+                                        className="text-2xl md:text-3xl leading-relaxed mb-6"
+                                        style={{ fontFamily: "'Pinyon Script', cursive" }}
+                                    >
+                                        {line}
+                                    </motion.p>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+
+                </AnimatePresence>
+            </div>
+
+            {/* Hint for Memory Card */}
             <AnimatePresence>
-                {!isComplete && progress < 10 && (
-                    <motion.div
+                {view === "memory" && (
+                    <motion.p
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        animate={{ opacity: 0.5 }}
                         exit={{ opacity: 0 }}
-                        className="absolute bottom-20 text-center pointer-events-none"
+                        className="absolute bottom-10 text-white/30 text-xs tracking-widest uppercase"
                     >
-                        <p className="text-rose-200/40 text-xs tracking-[0.4em] uppercase animate-pulse">
-                            Touch & Hold to Bloom
-                        </p>
-                    </motion.div>
+                        Tap to Read Letter
+                    </motion.p>
                 )}
             </AnimatePresence>
-
-            {/* --- THE ROSE CONTAINER --- */}
-            <div className={`relative z-10 w-64 h-64 md:w-96 md:h-96 flex items-center justify-center transition-all duration-1000 ${isComplete ? 'blur-sm scale-110 opacity-20' : ''}`}>
-                <div className="relative w-full h-full preserve-3d flex items-center justify-center" style={{ transformStyle: "preserve-3d", perspective: "800px" }}>
-                    {/* CORE GLOW */}
-                    <motion.div
-                        className="absolute w-20 h-20 bg-rose-500 rounded-full blur-[50px]"
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                    />
-
-                    {/* Generate Procedural Petals */}
-                    {/* Layer 1 (Inner) */}
-                    {[...Array(5)].map((_, i) => <Petal key={`l1-${i}`} index={i} total={5} progress={progress} />)}
-                    {/* Layer 2 */}
-                    {[...Array(5)].map((_, i) => <Petal key={`l2-${i}`} index={i + 5} total={5} progress={progress} />)}
-                    {/* Layer 3 (Outer) */}
-                    {[...Array(6)].map((_, i) => <Petal key={`l3-${i}`} index={i + 10} total={6} progress={progress} />)}
-
-                </div>
-            </div>
-
-            {/* --- THE LETTER CONTENT (REVEAL) --- */}
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                <div className="max-w-xl text-center px-6">
-                    {LETTER_LINES.map((line, i) => {
-                        // Show line based on progress milestones
-                        const lineTrigger = (i + 1) * (100 / (LETTER_LINES.length + 1));
-                        const isVisible = progress > lineTrigger;
-
-                        return (
-                            <motion.p
-                                key={i}
-                                initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-                                animate={{
-                                    opacity: isVisible ? 1 : 0,
-                                    y: isVisible ? 0 : 20,
-                                    filter: isVisible ? "blur(0px)" : "blur(10px)"
-                                }}
-                                transition={{ duration: 0.8, ease: "easeOut" }}
-                                className="text-white/90 font-serif text-xl md:text-3xl leading-relaxed mb-6 drop-shadow-lg"
-                            >
-                                {line}
-                            </motion.p>
-                        );
-                    })}
-                </div>
-
-                {/* FINAL SIGNATURE */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isComplete ? 1 : 0 }}
-                    transition={{ delay: 0.5, duration: 1 }}
-                    className="mt-12"
-                >
-                    <p className="text-rose-500 font-serif italic text-2xl">Forever Yours.</p>
-                </motion.div>
-            </div>
 
         </section>
     );
