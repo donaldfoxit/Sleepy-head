@@ -102,7 +102,7 @@ export default function RadioVisualizer() {
                     <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20">
                         <div className="flex flex-col">
                             <span className="text-[6px] text-cyan-400/70 font-mono tracking-widest uppercase mb-0.5">Frequency</span>
-                            <span className="text-[9px] text-white/90 font-medium tracking-wide">105.5 FM</span>
+                            <span className="text-[9px] text-white/90 font-medium tracking-wide">izu</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_red]" />

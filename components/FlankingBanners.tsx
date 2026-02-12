@@ -70,7 +70,7 @@ export default function FlankingBanners() {
                     transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
                     className="font-mono text-xs md:text-sm tracking-[0.3em] uppercase text-white/50"
                 >
-                    Since Day One • Forever
+                    since day one
                 </motion.div>
 
                 <motion.div

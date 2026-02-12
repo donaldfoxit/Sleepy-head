@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Fingerprint } from "lucide-react";
 import gsap from "gsap";
+import CameraCapture from "./CameraCapture";
 
 // Particle Interface
 interface Particle {
@@ -25,14 +26,18 @@ export default function QuantumTouch() {
     const particles = useRef<Particle[]>([]);
     const animationFrame = useRef<number>(0);
     const isHolding = useRef(false);
+    const audioRef = useRef<HTMLAudioElement | null>(null); // Pop sound
     const [showTicket, setShowTicket] = useState(false); // Finale State
+    const [showCamera, setShowCamera] = useState(false); // Camera modal state
+    const [showButterflyMessage, setShowButterflyMessage] = useState(false); // Butterfly delivery message
+    const [showCards, setShowCards] = useState(false); // Delayed card entrance
 
     // --- STATE FOR FLIP CARDS ---
     const [selectedCard, setSelectedCard] = useState<"cinema" | "car" | null>(null);
 
     // --- CONFIGURATION ---
-    const CHARGE_SPEED = 0.5; // How fast it charges per frame
-    const DECAY_SPEED = 1.0;  // How fast it drains when released
+    const CHARGE_SPEED = 0.25; // SLOWER: More dramatic buildup (was 0.5)
+    const DECAY_SPEED = 1.5;  // Faster drain to make holding necessary (was 1.0)
 
     // Initialize Particles & Animation Loop
     useEffect(() => {
@@ -207,6 +212,12 @@ export default function QuantumTouch() {
                 onComplete: () => {
                     setShowTicket(true); // Trigger Ticket Reveal
 
+                    // Play pop sound
+                    if (audioRef.current) {
+                        audioRef.current.volume = 0.3; // Soft volume
+                        audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+                    }
+
                     // Explosion: Send particles flying OUT
                     particles.current.forEach(p => {
                         p.x = canvas.width / 2;
@@ -219,7 +230,6 @@ export default function QuantumTouch() {
                     });
 
                     // 3. SPAWN PERMANENT GLITTER
-                    // Add 100 new "Sparkle" particles that just twinkle
                     for (let i = 0; i < 150; i++) {
                         particles.current.push({
                             x: Math.random() * canvas.width,
@@ -227,13 +237,18 @@ export default function QuantumTouch() {
                             vx: (Math.random() - 0.5) * 0.5,
                             vy: (Math.random() - 0.5) * 0.5,
                             size: Math.random() * 3,
-                            color: Math.random() > 0.5 ? "rgba(255, 215, 0, 0.8)" : "rgba(255, 255, 255, 0.8)", // Gold & White
-                            life: 99999, // Live forever
+                            color: Math.random() > 0.5 ? "rgba(255, 215, 0, 0.8)" : "rgba(255, 255, 255, 0.8)",
+                            life: 99999,
                         });
                     }
+
+                    // 4. SHOW CAMERA MODAL - After explosion settles
+                    setTimeout(() => {
+                        setShowCamera(true);
+                    }, 2500); // 2.5 second delay after explosion
                 }
             });
-        }, 600); // Wait for implosion to hit center
+        }, 800); // Longer implosion time (was 600)
     };
 
     return (
@@ -247,6 +262,13 @@ export default function QuantumTouch() {
         >
             {/* Canvas for Particles */}
             <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+
+            {/* Hidden Audio Element for Pop Sound */}
+            <audio
+                ref={audioRef}
+                src="https://cdn.pixabay.com/audio/2022/03/10/audio_4a382a81d6.mp3"
+                preload="auto"
+            />
 
             {/* --- SCANNER INTERFACE --- */}
             <AnimatePresence>
@@ -310,56 +332,160 @@ export default function QuantumTouch() {
                     transition={{ duration: 1 }}
                     className="absolute z-20 w-full h-full flex flex-col items-center justify-center pointer-events-none"
                 >
-                    {/* 1. THE ACTION BUTTON (YES) - Fades out after click */}
+                    {/* 1. THE PROPOSAL REVEAL */}
                     <AnimatePresence>
                         {!showTicket && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0, filter: "blur(20px)" }}
-                                transition={{ duration: 0.5 }}
-                                className="text-center flex flex-col items-center gap-6 px-4 pointer-events-auto"
+                                exit={{ opacity: 0, scale: 1.5, filter: "blur(30px)" }}
+                                transition={{ duration: 0.8 }}
+                                className="text-center flex flex-col items-center gap-12 px-4 pointer-events-auto max-w-4xl"
                             >
-                                <motion.h2
-                                    className="text-white/60 text-sm md:text-base tracking-[0.4em] uppercase font-light mb-4"
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 1 }}
+                                {/* Floating Hearts Background */}
+                                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                    {[...Array(8)].map((_, i) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ y: "100%", opacity: 0, x: `${Math.random() * 100}%` }}
+                                            animate={{
+                                                y: "-100%",
+                                                opacity: [0, 0.3, 0.3, 0],
+                                                x: `${Math.random() * 100}%`
+                                            }}
+                                            transition={{
+                                                duration: 8 + Math.random() * 4,
+                                                delay: i * 0.5,
+                                                repeat: Infinity
+                                            }}
+                                            className="absolute text-6xl"
+                                        >
+                                            💕
+                                        </motion.div>
+                                    ))}
+                                </div>
+
+                                {/* Top Line Accent */}
+                                <motion.div
+                                    initial={{ scaleX: 0, opacity: 0 }}
+                                    animate={{ scaleX: 1, opacity: 1 }}
+                                    transition={{ delay: 0.3, duration: 1.2, ease: "easeOut" }}
+                                    className="relative w-32 h-[1px] bg-gradient-to-r from-transparent via-rose-400 to-transparent"
+                                />
+
+                                {/* The Question - Word by Word Cascade */}
+                                <div className="relative space-y-6">
+                                    {/* Radial Glow */}
+                                    <div className="absolute inset-0 bg-gradient-radial from-rose-500/30 via-rose-500/10 to-transparent blur-3xl scale-150" />
+
+                                    <div className="relative z-10 space-y-3">
+                                        {/* Line 1: Baby */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 30, rotateX: 90 }}
+                                            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                                            transition={{ delay: 0.6, duration: 1, type: "spring", stiffness: 100 }}
+                                        >
+                                            <span className="block text-4xl md:text-6xl font-serif italic text-rose-300/90 tracking-wide">
+                                                Baby
+                                            </span>
+                                        </motion.div>
+
+                                        {/* Line 2: would you be */}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 30 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 1.2, duration: 1 }}
+                                        >
+                                            <span className="block text-3xl md:text-5xl text-white/80 font-light tracking-wider">
+                                                would you be
+                                            </span>
+                                        </motion.div>
+
+                                        {/* Line 3: my valentine? - THE STAR */}
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.5, rotateY: 180 }}
+                                            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                                            transition={{ delay: 1.8, duration: 1.5, type: "spring", bounce: 0.4 }}
+                                            className="relative"
+                                        >
+                                            <motion.span
+                                                animate={{
+                                                    textShadow: [
+                                                        "0 0 20px rgba(244,63,94,0.6)",
+                                                        "0 0 40px rgba(244,63,94,0.8)",
+                                                        "0 0 20px rgba(244,63,94,0.6)"
+                                                    ]
+                                                }}
+                                                transition={{ duration: 2, repeat: Infinity }}
+                                                className="text-5xl md:text-9xl font-serif italic text-rose-500 tracking-tight"
+                                            >
+                                                my valentine? 🥺
+                                            </motion.span>
+                                        </motion.div>
+                                    </div>
+                                </div>
+
+                                {/* Bottom Line + Button */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 2.5, duration: 1 }}
+                                    className="flex flex-col items-center gap-6"
                                 >
-                                    Connection Established
-                                </motion.h2>
+                                    <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-rose-400/50 to-transparent" />
 
-                                <h1 className="text-5xl md:text-7xl text-white font-serif tracking-tight drop-shadow-[0_0_30px_rgba(251,191,36,0.5)]">
-                                    Will You Be<br />My Valentine?
-                                </h1>
-
-                                <div className="flex gap-6 mt-12">
                                     <motion.button
-                                        whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(244,63,94,0.6)" }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="px-10 py-4 bg-rose-600 text-white font-bold tracking-widest uppercase text-sm rounded-full shadow-[0_0_15px_rgba(244,63,94,0.4)]"
+                                        initial={{ scale: 0.8 }}
+                                        animate={{ scale: 1 }}
+                                        whileHover={{ scale: 1.08, boxShadow: "0 0 60px rgba(244,63,94,0.5)" }}
+                                        whileTap={{ scale: 0.92 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                                        className="group relative px-16 py-6 bg-gradient-to-r from-rose-600 via-rose-500 to-rose-600 text-white font-bold tracking-[0.3em] uppercase text-sm rounded-full overflow-hidden shadow-[0_0_30px_rgba(244,63,94,0.4)] border-2 border-rose-400/30"
                                         onClick={handleExplosionSequence}
                                     >
-                                        Yes, Forever
+                                        <motion.div
+                                            className="absolute inset-0 bg-white/20"
+                                            initial={{ x: "-100%" }}
+                                            whileHover={{ x: "100%" }}
+                                            transition={{ duration: 0.6 }}
+                                        />
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            Yes, Forever
+                                            <motion.span
+                                                animate={{ scale: [1, 1.2, 1] }}
+                                                transition={{ duration: 1, repeat: Infinity }}
+                                            >
+                                                ❤️
+                                            </motion.span>
+                                        </span>
                                     </motion.button>
-                                </div>
+                                </motion.div>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {/* 2. MESSY FLIP CARDS (Reveals after explosion) */}
-                    {showTicket && (
-                        <div className="relative w-full h-screen flex items-center justify-center pointer-events-auto overflow-hidden">
-
+                    {/* 2. MESSY FLIP CARDS (Reveals GENTLY after explosion settles) */}
+                    {showTicket && showCards && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 1.5 }}
+                            className="relative w-full h-screen flex items-center justify-center pointer-events-auto overflow-hidden"
+                        >
                             {/* Overlay to deselect */}
                             <div
                                 className={`absolute inset-0 bg-black/80 transition-opacity duration-500 ${selectedCard ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
                                 onClick={() => setSelectedCard(null)}
                             />
 
-                            <h2 className={`absolute top-24 md:top-32 text-white/60 text-sm md:text-xl tracking-[0.3em] uppercase font-light text-center transition-opacity duration-500 z-0 ${selectedCard ? "opacity-0" : "opacity-100 delay-1000"}`}>
+                            <motion.h2
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: selectedCard ? 0 : 1, y: 0 }}
+                                transition={{ delay: 0.5, duration: 1 }}
+                                className="absolute top-24 md:top-32 text-white/60 text-sm md:text-xl tracking-[0.3em] uppercase font-light text-center z-0"
+                            >
                                 Choose Your Adventure
-                            </h2>
+                            </motion.h2>
 
                             {/* --- CARD 1: STARLIGHT CINEMA --- */}
                             <FlipCard
@@ -403,10 +529,49 @@ export default function QuantumTouch() {
                                 whatsappMessage="I choose Neon & Nostalgia! 📸🚗 Car date and crazy photo booth time!"
                             />
 
-                        </div>
+                        </motion.div>
                     )}
                 </motion.div>
             )}
+
+            {/* Camera Capture Modal */}
+            <CameraCapture
+                isOpen={showCamera}
+                onClose={() => setShowCamera(false)}
+                onPhotoSubmitted={() => {
+                    setShowCamera(false);
+                    setShowButterflyMessage(true); // Show butterfly message
+
+                    // Hide message and show cards after delay
+                    setTimeout(() => {
+                        setShowButterflyMessage(false);
+                        setShowCards(true);
+                    }, 2500); // 2.5 second pause to read message
+                }}
+            />
+
+            {/* Butterfly Delivery Message */}
+            <AnimatePresence>
+                {showButterflyMessage && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+                    >
+                        <motion.div
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="bg-gradient-to-br from-rose-500 to-pink-600 px-8 py-6 rounded-3xl shadow-2xl border-2 border-white/30 backdrop-blur-sm"
+                        >
+                            <p className="text-white text-xl md:text-2xl font-serif italic text-center">
+                                The butterflies will deliver this to me ❤️
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
         </section>
     );

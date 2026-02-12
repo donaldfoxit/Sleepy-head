@@ -26,6 +26,8 @@ export const metadata: Metadata = {
     description: "A beautiful romantic web experience with password protection",
 };
 
+import SmoothScroll from "@/components/SmoothScroll"; // Import SmoothScroll
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -33,7 +35,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className={`${bodoni.variable} ${playfair.variable} ${greatVibes.variable}`}>
-            <body>{children}</body>
+            <body>
+                <SmoothScroll>
+                    {children}
+                </SmoothScroll>
+            </body>
         </html>
     );
 }

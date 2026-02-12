@@ -9,22 +9,41 @@ export default function Letter() {
 
     // --- THE CONTENT OF YOUR LETTER ---
     const LETTER_CONTENT = (
-        <div className="space-y-6 text-gray-800">
-            <p>My Dearest Sleepy Head,</p>
+        <div className="space-y-5 text-gray-800 text-base md:text-lg leading-relaxed">
+            <p className="text-lg md:text-xl">My Dearest Sleepy Head,</p>
+            <p>
+                If people really saw you the way I see you, they&apos;d fall the way I fell.
+                It’s you I want to run the world with. Go everywhere, do everything with.
+                I think of you every day. Whatever shape or form you take, I want to be there.
+            </p>
+            <p>
+                It&apos;s not something many strive for, but just knowing you’re happy... seeing your smile... that&apos;s all the energy I need.
+                I want to give you back your calm. Morning calls. No mind games, no leaving you guessing. Just late night goodnights.
+            </p>
+            <p>
+                I want to make you feel safe. Valued. Noticed. Every single day.
+                Many times I randomly sit and retrace how we met, where we are, and why we are.
+                Honestly, anytime I hold your hands or hug you, I’m reminded that there are still cool people in this world. And you’re really cool to me.
+            </p>
+            <p>
+                I want to be your best friend. The one you call to talk about the eyelashes the woman selling tomatoes has. The little things, the in-betweens, and the big things.
+                I want to be your safe space—emotionally, spiritually, physically, and mentally.
+            </p>
+            <p>
+                I want to hear your childhood memories.
+                I might not be the first person to care for you, but I want to be the one who makes you feel loved to the core.
+            </p>
             <p>
                 I’ve been trying to find the perfect way to tell you how much you mean to me.
                 You are the missing piece I didn’t know I was looking for.
-            </p>
-            <p>
-                From the quiet mornings to the chaotic days, you make everything feel
-                like a movie scene I never want to end.
+                From the quiet mornings to the chaotic days, you make everything feel like a movie scene I never want to end.
             </p>
             <p>
                 Thank you for being my peace, my muse, and my favorite notification.
             </p>
-            <div className="pt-8 text-right">
-                <p className="font-serif italic text-xl text-rose-600">Forever Yours,</p>
-                <p className="font-bold text-lg mt-2">The Architect</p>
+            <div className="pt-8 text-right pb-8">
+                <p className="font-serif italic text-2xl md:text-3xl text-rose-600">Forever Yours,</p>
+                <p className="font-bold text-xl md:text-2xl mt-2">The Architect</p>
             </div>
         </div>
     );
@@ -122,7 +141,7 @@ export default function Letter() {
 
                 {/* --- THE LETTER (Slides Right) --- */}
                 <motion.div
-                    className="absolute z-10 w-[320px] md:w-[450px] h-[400px] md:h-[500px] bg-[#fffefc] rounded-sm shadow-2xl p-8 md:p-12 flex flex-col"
+                    className="absolute z-10 w-[380px] md:w-[600px] h-[550px] md:h-[700px] bg-[#fffefc] rounded-sm shadow-2xl p-8 md:p-12 flex flex-col"
                     initial={{ x: 0, rotate: 0, opacity: 0 }}
                     animate={isOpen ? { x: 200, rotate: 2, opacity: 1 } : { x: 0, rotate: 0, opacity: 0 }}
                     transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.8 }} // Delays until envelope moves

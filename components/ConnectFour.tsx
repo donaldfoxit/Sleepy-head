@@ -99,7 +99,7 @@ export default function ConnectFour() {
         return false;
     };
 
-    // AI Turn (Simple Random for "The Past")
+    // AI Turn (The Past - Rigged to Lose)
     useEffect(() => {
         if (currentPlayer === P2 && !gameOver) {
             const timer = setTimeout(() => {
@@ -109,10 +109,56 @@ export default function ConnectFour() {
                     if (board[0][c] === EMPTY) validCols.push(c);
                 }
 
-                if (validCols.length > 0) {
-                    const randomCol = validCols[Math.floor(Math.random() * validCols.length)];
-                    handleDrop(randomCol);
+                if (validCols.length === 0) return;
+
+                // --- THE RIGGING ---
+                // We want the AI to be STUPID.
+                // 1. Avoid winning (don't accidentally beat her)
+                // 2. Avoid blocking (let her win)
+
+                let safeCols = [];
+
+                for (let c of validCols) {
+                    // Simulate drop
+                    let tempBoard = board.map(row => [...row]);
+                    let r = -1;
+                    for (let i = ROWS - 1; i >= 0; i--) {
+                        if (tempBoard[i][c] === EMPTY) {
+                            r = i;
+                            break;
+                        }
+                    }
+                    if (r === -1) continue;
+
+                    // Check if this move wins for AI (AVOID IT)
+                    tempBoard[r][c] = P2;
+                    if (checkWin(tempBoard, r, c, P2)) {
+                        continue; // Don't pick this unless forced
+                    }
+
+                    // Check if this move blocks P1 (AVOID IT - Let her win!)
+                    // (To check block, see if P1 WOULD have won here)
+                    tempBoard[r][c] = P1; // Pretend it's P1's spot
+                    if (checkWin(tempBoard, r, c, P1)) {
+                        continue; // This spot is a winning spot for her. Don't take it!
+                    }
+
+                    safeCols.push(c);
                 }
+
+                // Decision
+                let chosenCol;
+                if (safeCols.length > 0) {
+                    // Pick a random SAFE column (doesn't win, doesn't block)
+                    chosenCol = safeCols[Math.floor(Math.random() * safeCols.length)];
+                } else {
+                    // If all moves involve winning or blocking, just pick random valids
+                    // (Sometimes you have to play)
+                    chosenCol = validCols[Math.floor(Math.random() * validCols.length)];
+                }
+
+                handleDrop(chosenCol);
+
             }, 800); // Thinking delay
             return () => clearTimeout(timer);
         }
