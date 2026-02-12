@@ -104,7 +104,7 @@ export default function FirstKiss() {
                         <div className="text-[120px] md:text-[180px] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] animate-pulse-slow leading-none">
                             💋
                         </div>
-                        <p className="text-white/60 text-lg md:text-2xl -mt-4 rotate-[-10deg] whitespace-nowrap drop-shadow-md" style={{ fontFamily: "'Pinyon Script', cursive" }}>
+                        <p className="text-white/40 text-sm md:text-base mt-2 tracking-[0.2em] uppercase font-light drop-shadow-md" style={{ fontFamily: "'Share Tech Mono', monospace" }}>
                             i wanted to remember
                         </p>
                     </motion.div>
