@@ -48,10 +48,10 @@ export default function FirstKiss() {
                                 <span className="animate-pulse">●</span> Now Playing
                             </div>
                             <div className="text-white/90 text-2xl font-serif italic">
-                                Little Love
+                                Selfish
                             </div>
                             <div className="text-white/40 text-sm font-light">
-                                James Smith
+                                Justin Timberlake
                             </div>
                         </div>
                     </div>
