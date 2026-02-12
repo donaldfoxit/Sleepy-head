@@ -58,39 +58,37 @@ export default function FirstKiss() {
                 </motion.div>
 
 
-                {/* --- RIGHT: THE GIANT KISS --- */}
+                {/* --- RIGHT: THE REAL PHOTO --- */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, delay: 0.3, type: "spring", bounce: 0.4 }}
+                    initial={{ opacity: 0, scale: 0.9, rotate: 5 }}
+                    whileInView={{ opacity: 1, scale: 1, rotate: 3 }}
+                    transition={{ duration: 1, delay: 0.3, type: "spring", bounce: 0.4 }}
                     viewport={{ once: true }}
-                    className="relative"
+                    className="relative group"
                 >
-                    {/* Pulsing Glow Layer */}
-                    <motion.div
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.5, 0.2] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute inset-0 blur-[80px] bg-rose-600 rounded-full"
+                    {/* Glow Layer */}
+                    <div
+                        className="absolute -inset-4 bg-rose-600/20 blur-xl rounded-[2rem] group-hover:bg-rose-600/30 transition-all duration-700"
                     />
 
-                    {/* THE EMOJI */}
-                    <motion.div
-                        animate={{ scale: [1, 1.05, 1], rotate: [0, 5, -5, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        className="relative z-10 text-[150px] md:text-[250px] leading-none filter drop-shadow-2xl"
-                    >
-                        💋
-                    </motion.div>
+                    {/* The Photo Container */}
+                    <div className="relative w-[300px] md:w-[400px] h-[400px] md:h-[500px] bg-white p-3 shadow-2xl rotate-2 transform transition-transform duration-700 hover:rotate-0 hover:scale-[1.02]">
+                        {/* Film Grain/Touch */}
+                        <div className="absolute inset-0 z-20 pointer-events-none opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dust.png')]" />
 
-                    {/* Label */}
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 }}
-                        className="absolute -bottom-10 left-0 right-0 text-center text-white/50 text-sm tracking-[0.5em] uppercase font-light"
-                    >
-                        Our First Kiss
-                    </motion.p>
+                        {/* The Image */}
+                        <div className="w-full h-full overflow-hidden bg-black/10 relative">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src="/images/first-kiss.jpg"
+                                alt="First Kiss Memory"
+                                className="w-full h-full object-cover filter contrast-[1.1] saturate-[1.1] sepia-[0.1]"
+                            />
+                        </div>
+
+                        {/* Tape Effect */}
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-32 h-10 bg-white/20 backdrop-blur-sm rotate-2 shadow-sm border border-white/10 z-30 opacity-60" />
+                    </div>
                 </motion.div>
 
             </div>
