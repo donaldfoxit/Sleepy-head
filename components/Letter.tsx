@@ -10,7 +10,7 @@ export default function Letter() {
     // --- THE CONTENT OF YOUR LETTER ---
     const LETTER_CONTENT = (
         <div className="space-y-5 text-gray-800 text-base md:text-lg leading-relaxed">
-            <p className="text-lg md:text-xl">My Dearest Sleepy Head,</p>
+            <p className="text-lg md:text-xl font-bold tracking-widest">HI SLEEPY HEAD,</p>
             <p>
                 If people really saw you the way I see you, they&apos;d fall the way I fell.
                 It’s you I want to run the world with. Go everywhere, do everything with.
@@ -43,7 +43,7 @@ export default function Letter() {
             </p>
             <div className="pt-8 text-right pb-8">
                 <p className="font-serif italic text-2xl md:text-3xl text-rose-600">Forever Yours,</p>
-                <p className="font-bold text-xl md:text-2xl mt-2">The Architect</p>
+                <p className="font-bold text-xl md:text-2xl mt-2 uppercase tracking-wide">IZU CHUKWUDI</p>
             </div>
         </div>
     );
