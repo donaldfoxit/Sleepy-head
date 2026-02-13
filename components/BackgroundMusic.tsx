@@ -20,6 +20,8 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
     const hasStartedRef = useRef(false);
     const shouldPlayRef = useRef(shouldPlay);
 
+    const isExternalAudioPlaying = useStore((state) => state.isExternalAudioPlaying);
+
     // Keep ref in sync
     useEffect(() => {
         shouldPlayRef.current = shouldPlay;
@@ -52,7 +54,7 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
                 events: {
                     'onReady': (event: any) => {
                         // Check strict ref value to avoid closure staleness
-                        if (shouldPlayRef.current) {
+                        if (shouldPlayRef.current && !isExternalAudioPlaying) {
                             event.target.setVolume(50); // Set to 50% volume
                             event.target.playVideo();
                             hasStartedRef.current = true;
@@ -69,9 +71,50 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
         };
     }, []);
 
+    // Helper to fade volume
+    const fadeVolume = (targetVol: number, duration: number = 1000) => {
+        if (!playerRef.current) return;
+
+        const startVol = playerRef.current.getVolume();
+        const steps = 20;
+        const stepTime = duration / steps;
+        const volStep = (targetVol - startVol) / steps;
+
+        let currentStep = 0;
+
+        const fadeInterval = setInterval(() => {
+            currentStep++;
+            const newVol = startVol + (volStep * currentStep);
+            playerRef.current.setVolume(newVol);
+
+            if (currentStep >= steps) {
+                clearInterval(fadeInterval);
+                if (targetVol === 0) {
+                    playerRef.current.pauseVideo();
+                }
+            }
+        }, stepTime);
+    };
+
+    // Watch for External Audio State Changes
+    useEffect(() => {
+        if (!playerRef.current || !playerRef.current.playVideo) return;
+
+        if (isExternalAudioPlaying) {
+            // External audio started -> Pause background music
+            fadeVolume(0, 800);
+        } else {
+            // External audio stopped -> Resume background music (if it should be playing)
+            if (shouldPlay) {
+                playerRef.current.playVideo();
+                fadeVolume(50, 1500); // Fade back in slowly
+            }
+        }
+    }, [isExternalAudioPlaying]);
+
     // Watch for Start Trigger (or Unlock state for backup)
     useEffect(() => {
-        if (shouldPlay && playerRef.current && playerRef.current.playVideo) {
+        if (shouldPlay && playerRef.current && playerRef.current.playVideo && !isExternalAudioPlaying) {
             attemptPlay();
         }
     }, [shouldPlay]);

@@ -4,8 +4,19 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Music } from "lucide-react";
 
+import { useStore } from "@/store/useStore";
+
 export default function SpotifyScanner() {
     const [playing, setPlaying] = React.useState<string | null>(null);
+    const setIsExternalAudioPlaying = useStore((state) => state.setIsExternalAudioPlaying);
+
+    // Sync local playing state with global store
+    React.useEffect(() => {
+        setIsExternalAudioPlaying(!!playing);
+
+        // Cleanup on unmount
+        return () => setIsExternalAudioPlaying(false);
+    }, [playing, setIsExternalAudioPlaying]);
 
     return (
         <section className="relative w-full py-20 bg-black flex flex-col items-center justify-center overflow-hidden">
