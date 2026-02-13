@@ -496,29 +496,10 @@ export default function QuantumTouch() {
                                 transition={{ delay: 0.5, duration: 1 }}
                                 className="absolute top-24 md:top-32 text-white/60 text-sm md:text-xl tracking-[0.3em] uppercase font-light text-center z-0"
                             >
-                                Choose Your Adventure
+                                Your Adventure
                             </motion.h2>
 
-                            {/* --- CARD 1: STARLIGHT CINEMA --- */}
-                            <FlipCard
-                                id="cinema"
-                                isSelected={selectedCard === "cinema"}
-                                isOtherSelected={selectedCard !== null && selectedCard !== "cinema"}
-                                onClick={() => setSelectedCard(selectedCard === "cinema" ? null : "cinema")}
-                                initialRotation={-6}
-                                initialX={-140}
-                                color="from-indigo-900 to-black"
-                                borderColor="border-indigo-500/50"
-                                icon="🌜"
-                                title="Starlight Cinema"
-                                subtitle="Movie in the Park"
-                                details={{
-                                    time: "8:00 PM",
-                                    location: "Centennial Park",
-                                    note: "Outdoors with people. Blankets, natural breeze, drinks, and chow."
-                                }}
-                                whatsappMessage="I choose the Starlight Cinema! 🌜🍿 Let's watch a movie in the park."
-                            />
+
 
                             {/* --- CARD 2: NEON & NOSTALGIA --- */}
                             <FlipCard
@@ -526,8 +507,8 @@ export default function QuantumTouch() {
                                 isSelected={selectedCard === "car"}
                                 isOtherSelected={selectedCard !== null && selectedCard !== "car"}
                                 onClick={() => setSelectedCard(selectedCard === "car" ? null : "car")}
-                                initialRotation={8}
-                                initialX={140}
+                                initialRotation={0}
+                                initialX={0}
                                 color="from-rose-950 to-black"
                                 borderColor="border-rose-500/50"
                                 icon="📸"
