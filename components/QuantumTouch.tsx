@@ -306,10 +306,22 @@ export default function QuantumTouch() {
                         </div>
 
                         {/* Text Instruction */}
-                        <div className="text-center h-12">
+                        <div className="text-center h-16">
+                            {/* Main instruction */}
                             <p className={`text-xs tracking-[0.3em] uppercase transition-all duration-300 ${isHolding.current ? "text-rose-400 font-bold" : "text-white/30"}`}>
                                 {isHolding.current ? "HOLD TO SYNC..." : "INITIATE CONNECTION"}
                             </p>
+                            {/* Subtle hint */}
+                            {!isHolding.current && (
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                    className="text-[10px] text-white/20 mt-2 tracking-wider"
+                                >
+                                    Click & Hold
+                                </motion.p>
+                            )}
                             {/* Charge Bar (Optional Visual) */}
                             {isHolding.current && (
                                 <div className="w-32 h-1 bg-white/10 mt-4 rounded-full overflow-hidden mx-auto">

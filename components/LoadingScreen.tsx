@@ -52,7 +52,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             <div className="relative z-10 flex flex-col items-center">
                 {/* Percentage */}
                 <motion.div
-                    className="text-8xl md:text-9xl font-black text-rose-500 tracking-tighter mb-4 drop-shadow-[0_0_20px_rgba(244,63,94,0.5)]"
+                    className="text-8xl md:text-9xl font-black text-rose-300 tracking-tighter mb-4 drop-shadow-[0_0_20px_rgba(251,207,232,0.6)]"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     style={{ fontFamily: "'Playfair Display', serif" }}
@@ -72,9 +72,9 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             </div>
 
             {/* Progress Bar (Thin Line) */}
-            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-rose-900/20">
+            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-rose-300/10">
                 <motion.div
-                    className="h-full bg-rose-500 shadow-[0_0_20px_#f43f5e]"
+                    className="h-full bg-rose-300 shadow-[0_0_20px_rgba(251,207,232,0.8)]"
                     initial={{ width: "0%" }}
                     animate={{ width: `${progress}%` }}
                     transition={{ ease: "linear" }}

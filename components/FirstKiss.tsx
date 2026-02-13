@@ -27,24 +27,24 @@ export default function FirstKiss() {
                     className="flex flex-col items-center md:items-end text-center md:text-right space-y-2"
                 >
                     {/* "Dashboard" Display container */}
-                    <div className="bg-black/50 border border-red-900/30 p-8 rounded-2xl backdrop-blur-sm shadow-[0_0_50px_rgba(220,38,38,0.1)]">
-                        <div className="text-red-600/60 text-xs tracking-[0.4em] uppercase mb-4 font-bold">
+                    <div className="bg-black/50 border border-rose-300/30 p-8 rounded-2xl backdrop-blur-sm shadow-[0_0_50px_rgba(251,207,232,0.15)]">
+                        <div className="text-rose-300/60 text-xs tracking-[0.4em] uppercase mb-4 font-bold">
                             Time Stamp
                         </div>
 
                         {/* THE TIME */}
-                        <h1 className="text-6xl md:text-8xl text-red-600 font-bold tracking-tighter drop-shadow-[0_0_20px_rgba(220,38,38,0.8)] leading-none" style={{ fontFamily: "'Share Tech Mono', monospace" }}>
+                        <h1 className="text-6xl md:text-8xl text-rose-300 font-bold tracking-tighter drop-shadow-[0_0_20px_rgba(251,207,232,0.8)] leading-none" style={{ fontFamily: "'Share Tech Mono', monospace" }}>
                             11:56<span className="text-2xl md:text-3xl align-top ml-2 opacity-50">PM</span>
                         </h1>
 
                         {/* THE DATE */}
-                        <div className="text-red-800/80 text-lg md:text-xl tracking-[0.3em] font-mono mt-2">
+                        <div className="text-rose-300/80 text-lg md:text-xl tracking-[0.3em] font-mono mt-2">
                             FEB 11 2026
                         </div>
 
                         {/* AUDIO TRACK */}
-                        <div className="mt-8 pt-6 border-t border-red-900/30 flex flex-col items-center md:items-end">
-                            <div className="flex items-center gap-2 text-red-500/80 text-xs uppercase tracking-widest mb-1">
+                        <div className="mt-8 pt-6 border-t border-rose-300/30 flex flex-col items-center md:items-end">
+                            <div className="flex items-center gap-2 text-rose-300/80 text-xs uppercase tracking-widest mb-1">
                                 <span className="animate-pulse">●</span> Now Playing
                             </div>
                             <div className="text-white/90 text-2xl font-serif italic">

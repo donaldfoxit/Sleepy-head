@@ -105,8 +105,8 @@ export default function RadioVisualizer() {
                             <span className="text-[9px] text-white/90 font-medium tracking-wide">izu</span>
                         </div>
                         <div className="flex items-center gap-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_red]" />
-                            <span className="text-[6px] text-red-400 font-bold uppercase tracking-wider">LIVE</span>
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-300 animate-pulse shadow-[0_0_6px_rgba(251,207,232,0.8)]" />
+                            <span className="text-[6px] text-rose-300 font-bold uppercase tracking-wider">LIVE</span>
                         </div>
                     </div>
 

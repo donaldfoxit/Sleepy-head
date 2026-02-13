@@ -23,11 +23,10 @@ import MobileRestriction from "@/components/MobileRestriction";
 import QuantumTouch from "@/components/QuantumTouch";
 
 import { useLenis } from "@studio-freight/react-lenis";
-import { ArrowDown } from "lucide-react";
 
 // Helper Component for Navigation
 const ScrollPrompt = ({ to, label = "Continue" }: { to: string; label?: string }) => {
-    const lenis = useLenis(({ scroll }) => {
+    const lenis = useLenis(() => {
         // called every scroll
     });
 
@@ -38,18 +37,22 @@ const ScrollPrompt = ({ to, label = "Continue" }: { to: string; label?: string }
             transition={{ delay: 1, duration: 1 }}
             className="absolute bottom-6 left-0 right-0 z-30 flex justify-center pointer-events-none"
         >
-            <button
+            <motion.button
                 onClick={() => lenis?.scrollTo(`#${to}`)}
-                className="pointer-events-auto flex flex-col items-center gap-1 text-white/30 hover:text-white/80 transition-colors group cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                    boxShadow: [
+                        "0 0 20px rgba(251,207,232,0.3)",
+                        "0 0 30px rgba(251,207,232,0.5)",
+                        "0 0 20px rgba(251,207,232,0.3)"
+                    ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="pointer-events-auto px-8 py-4 bg-gradient-to-r from-rose-300/15 to-rose-400/15 backdrop-blur-sm border-2 border-rose-300/40 rounded-full text-rose-300 font-bold tracking-wider hover:bg-rose-300/25 transition-colors cursor-pointer drop-shadow-[0_0_12px_rgba(251,207,232,0.5)]"
             >
-                <span className="text-[10px] uppercase tracking-[0.2em] font-mono group-hover:tracking-[0.3em] transition-all">{label}</span>
-                <motion.div
-                    animate={{ y: [0, 5, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                    <ArrowDown className="w-4 h-4" />
-                </motion.div>
-            </button>
+                Scroll or Tap to Continue
+            </motion.button>
         </motion.div>
     );
 };

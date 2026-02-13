@@ -143,9 +143,8 @@ export default function Stargazer({ onComplete }: StargazerProps) {
                             key={star.id}
                             onClick={() => handleStarClick(star.id)}
                             className={`absolute w-3 h-3 -ml-1.5 -mt-1.5 rounded-full z-20 transition-all duration-300
-                                ${isActive ? "bg-amber-400 scale-150 shadow-[0_0_15px_rgba(251,191,36,1)]" :
-                                    isConnected ? "bg-white scale-110 shadow-[0_0_8px_white]" : "bg-white/60 hover:bg-white hover:scale-125"}
-                            `}
+                                ${isActive ? "bg-rose-300 scale-150 shadow-[0_0_15px_rgba(251,207,232,0.4)]" :
+                                    isConnected ? "bg-white scale-110 shadow-[0_0_8px_white]" : "bg-white/60 hover:bg-white hover:scale-125"}`}
                             style={{ left: `${star.x}%`, top: `${star.y}%` }}
                             whileTap={{ scale: 0.9 }}
                         >

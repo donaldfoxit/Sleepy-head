@@ -34,17 +34,17 @@ export default function StartScreen({ onStart }: StartScreenProps) {
                 <div className="relative flex items-center justify-center w-32 h-32">
                     {/* Glow Behind Heart Only (Radial Gradient to prevent box glitch) */}
                     <motion.div
-                        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute inset-0 rounded-full blur-2xl pointer-events-none"
+                        className="absolute inset-0 rounded-full blur-3xl pointer-events-none"
                         style={{
-                            background: "radial-gradient(circle, rgba(225, 29, 72, 0.4) 0%, transparent 70%)"
+                            background: "radial-gradient(circle, rgba(251, 207, 232, 0.15) 0%, transparent 70%)"
                         }}
                     />
 
                     <Heart
                         fill="currentColor"
-                        className="relative z-10 w-24 h-24 md:w-32 md:h-32 text-rose-600 drop-shadow-[0_0_30px_rgba(225,29,72,0.6)] transition-all duration-500 group-hover:text-rose-500 group-hover:drop-shadow-[0_0_50px_rgba(225,29,72,0.8)]"
+                        className="relative z-10 w-24 h-24 md:w-32 md:h-32 text-rose-300 drop-shadow-[0_0_30px_rgba(251,207,232,0.6)] transition-all duration-500 group-hover:text-rose-200 group-hover:drop-shadow-[0_0_50px_rgba(251,207,232,0.8)]"
                     />
                 </div>
 

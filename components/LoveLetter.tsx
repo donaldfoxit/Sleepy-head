@@ -60,8 +60,8 @@ export default function LoveLetter() {
                 </div>
 
                 {/* Red Wax Seal */}
-                <div className="absolute bottom-10 left-10 w-16 h-16 bg-red-800 rounded-full flex items-center justify-center shadow-lg border-4 border-red-900/50 opacity-80 backdrop-blur-sm">
-                    <div className="text-red-950 font-serif font-bold text-2xl">L</div>
+                <div className="absolute bottom-10 left-10 w-16 h-16 bg-rose-400 rounded-full flex items-center justify-center shadow-lg border-4 border-rose-500/50 opacity-80 backdrop-blur-sm">
+                    <div className="text-rose-950 font-serif font-bold text-2xl">L</div>
                 </div>
 
             </motion.div>

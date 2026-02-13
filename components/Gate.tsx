@@ -46,7 +46,7 @@ export default function Gate() {
                 vy: Math.sin(angle) * velocity,
                 size: Math.random() * 3 + 0.5, // Tiny dust to larger sparkles
                 color: Math.random() > 0.6
-                    ? `rgba(244, 63, 94, ${Math.random() * 0.5 + 0.5})` // Pink (Rose-500)
+                    ? `rgba(251, 207, 232, ${Math.random() * 0.5 + 0.5})` // Faint Pink (Rose-300)
                     : Math.random() > 0.5
                         ? `rgba(251, 191, 36, ${Math.random() * 0.5 + 0.5})` // Gold
                         : `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.5})`, // White
@@ -156,7 +156,7 @@ export default function Gate() {
                     className="text-3xl md:text-4xl text-center text-white font-bold mb-2 tracking-tight"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                    WHAT'S THE <span className="text-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]">MAGIC</span> WORD?
+                    WHAT'S THE <span className="text-rose-300 drop-shadow-[0_0_15px_rgba(251,207,232,0.6)]">MAGIC</span> WORD?
                 </motion.h2>
 
                 <motion.p
@@ -184,7 +184,7 @@ export default function Gate() {
                             setError(false);
                         }}
                         placeholder="Type the magic word..."
-                        className={`w-full bg-transparent border-b-2 border-white/20 py-4 text-center text-3xl md:text-5xl text-white placeholder-white/10 outline-none transition-all duration-500 focus:border-rose-500 focus:text-rose-100 focus:drop-shadow-[0_0_25px_rgba(244,63,94,0.6)] font-serif italic ${error ? 'animate-shake text-rose-500 border-rose-500' : ''}`}
+                        className={`w-full bg-transparent border-b-2 border-white/20 py-4 text-center text-3xl md:text-5xl text-white placeholder-white/10 outline-none transition-all duration-500 focus:border-rose-300 focus:text-rose-100 focus:drop-shadow-[0_0_25px_rgba(251,207,232,0.6)] font-serif italic ${error ? 'animate-shake text-rose-300 border-rose-300' : ''}`}
                         autoFocus
                         style={{ fontFamily: "'Playfair Display', serif" }}
                     />
@@ -207,7 +207,7 @@ export default function Gate() {
                     <motion.p
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center text-red-400/80 text-xs mt-6 tracking-widest uppercase"
+                        className="text-center text-rose-300/80 text-xs mt-6 tracking-widest uppercase"
                     >
                         Access Denied. Try "Forever"
                     </motion.p>
