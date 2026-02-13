@@ -107,72 +107,68 @@ export default function Home() {
                             animate={{ opacity: 1 }}
                             transition={{ duration: 2, ease: "easeInOut" }}
                         >
-                            {/* 2. GALLERY (The Vibe) */}
-                            <div id="gallery" className="relative">
-                                <Gallery />
-                                <ScrollPrompt to="manifesto" />
-                            </div>
-
-                            {/* 3. MANIFESTO (The Poetry) */}
+                            {/* 2. THE SPARK (Manifesto) - Moved up */}
                             <div id="manifesto" className="relative">
                                 <Manifesto onComplete={() => setStargazerComplete(true)} />
-                                {/* Skip Flanking (banners) scroll prompt */}
+                                <ScrollPrompt to="gallery" label="View Gallery" />
                             </div>
 
-                            {/* RESTORED: FlankingBanners */}
+                            {/* 3. THE GALLERY (Vibe) - Moved down */}
+                            <div id="gallery" className="relative">
+                                <Gallery />
+                                <ScrollPrompt to="banners" />
+                            </div>
+
+                            {/* 4. FLANKING BANNER */}
                             <div id="banners" className="relative">
                                 <FlankingBanners />
-
+                                <ScrollPrompt to="connect-four" />
                             </div>
 
-                            {/* 4. CONNECT FOUR (The Game) */}
+                            {/* 5. THE GAME (Connect Four) */}
                             <div id="connect-four" className="relative">
-                                {/* ConnectFour has internal logic, but we wrap it for ID */}
                                 <ConnectFour />
-                                {/* ConnectFour has its own 'Proceed' button on win, but a skip might be nice? 
-                             User said: "make sure she can only play in the winning position".
-                             I'll leave the 'Proceed' button inside ConnectFour to handle the 'Win' state logic,
-                             but maybe add a subtle skip just in case? No, let forced win happen.
-                         */}
+                                {/* Game usually has its own flow, but adding prompt just in case */}
+                                <ScrollPrompt to="chat-floating" label="Next Chapter" />
                             </div>
 
-                            {/* 5. CHAT MESSAGES (The Reality) */}
+                            {/* 6. CHAT MESSAGE FLOATING */}
                             <div id="chat-floating" className="relative">
                                 <ChatFloating />
-                                <ScrollPrompt to="nickname" />
-                            </div>
-
-                            {/* 6. NICKNAME NOTE (The Secret) */}
-                            <div id="nickname" className="relative">
-                                <NicknameScreen />
                                 <ScrollPrompt to="film-reel" />
                             </div>
 
-                            {/* 7. FILM REEL (The Timeline) */}
+                            {/* 7. REEL (Film Reel) */}
                             <div id="film-reel" className="relative">
                                 <FilmReel />
                                 <ScrollPrompt to="first-kiss" />
                             </div>
 
-                            {/* 7.5. FIRST KISS */}
+                            {/* 8. FIRST KISS */}
                             <div id="first-kiss" className="relative">
                                 <FirstKiss />
+                                <ScrollPrompt to="nickname" />
+                            </div>
+
+                            {/* 9. NICKNAME */}
+                            <div id="nickname" className="relative">
+                                <NicknameScreen />
                                 <ScrollPrompt to="letter" />
                             </div>
 
-                            {/* 8. LETTER (The Finale) */}
+                            {/* 10. LETTER */}
                             <div id="letter" className="relative">
                                 <Letter />
                                 <ScrollPrompt to="proposal" label="Forever" />
                             </div>
 
-                            {/* 9. THE PROPOSAL (Quantum Touch) */}
+                            {/* 11. QUANTUM TOUCH (The Proposal) */}
                             <div id="proposal" className="relative">
                                 <QuantumTouch />
-                                {/* No next prompt, this is the end (mostly) */}
+                                <ScrollPrompt to="spotify" label="Soundtrack" />
                             </div>
 
-                            {/* 10. SPOTIFY SCANNER (The Soundtrack) */}
+                            {/* 12. SPOTIFY */}
                             <div id="spotify" className="relative">
                                 <SpotifyScanner />
                             </div>
