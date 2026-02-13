@@ -60,8 +60,8 @@ export default function Home() {
     return (
         <main className="relative min-h-screen w-full bg-black overflow-x-hidden">
 
-            {/* --- MOBILE RESTRICTION OVERLAY --- */}
-            <MobileRestriction />
+            {/* --- MOBILE RESTRICTION OVERLAY (DISABLED PER USER REQUEST) --- */}
+            {/* <MobileRestriction /> */}
 
             <AnimatePresence mode="wait">
                 {!startInteraction && (
