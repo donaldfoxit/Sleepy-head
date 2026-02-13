@@ -16,8 +16,8 @@ export default function Gate() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // --- CONFIGURATION ---
-    const PASSWORDS = ["forever", "Forever", "FOREVER", "favour", "Favour", "FAVOUR"];
-    const CLUE = "(Hint: It ends with \"ER\")";
+    const PASSWORDS = ["ashwagandha", "Ashwagandha", "ASHWAGANDHA", "Ash", "ash"];
+    const CLUE = "(Hint: The ancient herb)";
 
 
     // Preload success sound to eliminate lag
