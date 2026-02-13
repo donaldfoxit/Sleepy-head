@@ -677,7 +677,7 @@ function FlipCard({
                     <button
                         onClick={(e) => {
                             e.stopPropagation(); // Prevent flip
-                            const phone = "1234567890";
+                            const phone = "2348175983098";
                             window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
                         }}
                         className="w-full py-4 bg-white text-black font-bold tracking-[0.2em] uppercase text-xs rounded-full hover:bg-rose-100 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]"
