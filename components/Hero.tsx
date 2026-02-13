@@ -201,7 +201,7 @@ export default function Hero() {
                         <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                            className="absolute -top-4 -right-4 md:top-[15%] md:right-[-5%] text-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" // Pink Star
+                            className="absolute -top-4 -right-4 md:top-[15%] md:right-[-5%] text-rose-300 drop-shadow-[0_0_15px_rgba(251,207,232,0.6)]" // Faint Pink Star
                         >
                             {/* Simple Star Icon */}
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 md:w-20 md:h-20">
@@ -214,16 +214,7 @@ export default function Hero() {
 
             </motion.div>
 
-            {/* --- SCROLL INDICATOR --- */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, delay: 2 }}
-                className="absolute bottom-12 text-white/40 flex flex-col items-center gap-2"
-            >
-                <span className="text-[10px] tracking-[0.3em] uppercase">Scroll</span>
-                <ArrowDown size={16} />
-            </motion.div>
+
 
             {/* --- OVERLAY TEXTURE --- */}
             <div className="absolute inset-0 pointer-events-none z-20 mix-blend-soft-light opacity-30"

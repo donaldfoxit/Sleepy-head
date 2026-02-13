@@ -66,7 +66,7 @@ export default function Letter() {
 
                 {/* --- THE ENVELOPE (Slides Left) --- */}
                 <motion.div
-                    className="relative z-20 w-[350px] md:w-[500px] h-[250px] md:h-[350px] perspective-1000"
+                    className={`relative w-[350px] md:w-[500px] h-[250px] md:h-[350px] perspective-1000 transition-all duration-500 ${isOpen ? 'z-10' : 'z-30'}`}
                     initial={false}
                     animate={isOpen ? { x: -250, rotateY: 10 } : { x: 0, rotateY: 0 }}
                     transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.5 }} // Slide delay to let ribbon untie
@@ -141,7 +141,7 @@ export default function Letter() {
 
                 {/* --- THE LETTER (Slides Right) --- */}
                 <motion.div
-                    className="absolute z-10 w-[380px] md:w-[600px] h-[550px] md:h-[700px] bg-[#fffefc] rounded-sm shadow-2xl p-8 md:p-12 flex flex-col"
+                    className={`absolute w-[380px] md:w-[600px] h-[550px] md:h-[700px] bg-[#fffefc] rounded-sm shadow-2xl p-8 md:p-12 flex flex-col transition-all duration-500 ${isOpen ? 'z-30' : 'z-10'}`}
                     initial={{ x: 0, rotate: 0, opacity: 0 }}
                     animate={isOpen ? { x: 200, rotate: 2, opacity: 1 } : { x: 0, rotate: 0, opacity: 0 }}
                     transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.8 }} // Delays until envelope moves
@@ -150,7 +150,7 @@ export default function Letter() {
                     <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')]" />
 
                     {/* Letter Content */}
-                    <div className="relative z-10 font-mono text-sm md:text-base leading-relaxed overflow-y-auto custom-scrollbar" style={{ fontFamily: "'Courier Prime', monospace" }}>
+                    <div className="relative z-10 font-mono text-sm md:text-base leading-relaxed overflow-y-auto custom-scrollbar" style={{ fontFamily: "'Courier Prime', monospace" }} data-lenis-prevent>
                         {LETTER_CONTENT}
                     </div>
 

@@ -30,7 +30,10 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     return (
         <motion.div
             className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black overflow-hidden"
-            exit={{ opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 3, ease: "easeInOut" } }}
+            transition={{ duration: 3, ease: "easeOut" }} // Very slow cinematic fade in
         >
             {/* --- TEXTURES (Matching Hero) --- */}
             <div className="absolute inset-0 z-0">
@@ -52,7 +55,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
             <div className="relative z-10 flex flex-col items-center">
                 {/* Percentage */}
                 <motion.div
-                    className="text-8xl md:text-9xl font-black text-rose-300 tracking-tighter mb-4 drop-shadow-[0_0_20px_rgba(251,207,232,0.6)]"
+                    className="text-8xl md:text-9xl font-black text-rose-300 tracking-tighter mb-4"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     style={{ fontFamily: "'Playfair Display', serif" }}

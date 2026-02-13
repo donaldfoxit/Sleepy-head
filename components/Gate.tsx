@@ -13,15 +13,25 @@ export default function Gate() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const particles = useRef<any[]>([]);
     const animationFrame = useRef<number>(0);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // --- CONFIGURATION ---
     const PASSWORDS = ["forever", "Forever", "FOREVER", "favour", "Favour", "FAVOUR"];
     const CLUE = "(Hint: It ends with \"ER\")";
 
+
+    // Preload success sound to eliminate lag
+    useEffect(() => {
+        audioRef.current = new Audio('/sounds/correct-answer.mp3');
+        audioRef.current.volume = 0.7;
+        audioRef.current.load();
+    }, []);
+
     const playSuccessSound = () => {
-        const audio = new Audio('/sounds/correct-answer.mp3');
-        audio.volume = 0.7;
-        audio.play().catch(err => console.log('Audio playback failed:', err));
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(err => console.log('Audio playback failed:', err));
+        }
     };
 
     // --- PARTICLE SYSTEM ---
@@ -107,7 +117,7 @@ export default function Gate() {
             // Transition delay
             setTimeout(() => {
                 setIsUnlocked(true);
-            }, 2000);
+            }, 4500);
         } else {
             setError(true);
             setTimeout(() => setError(false), 1000);
@@ -118,7 +128,7 @@ export default function Gate() {
         <motion.div
             className="fixed inset-0 z-[90] flex items-center justify-center bg-black overflow-hidden"
             animate={{ opacity: success ? 0 : 1 }}
-            transition={{ duration: 1.5, ease: "easeInOut", delay: 1.0 }} // Wait for explosion, then fade
+            transition={{ duration: 3, ease: "easeInOut", delay: 1.0 }} // Wait for explosion, then fade
         >
             {/* Canvas for Particles */}
             <canvas
@@ -183,8 +193,8 @@ export default function Gate() {
                             setInput(e.target.value);
                             setError(false);
                         }}
-                        placeholder="Type the magic word..."
-                        className={`w-full bg-transparent border-b-2 border-white/20 py-4 text-center text-3xl md:text-5xl text-white placeholder-white/10 outline-none transition-all duration-500 focus:border-rose-300 focus:text-rose-100 focus:drop-shadow-[0_0_25px_rgba(251,207,232,0.6)] font-serif italic ${error ? 'animate-shake text-rose-300 border-rose-300' : ''}`}
+                        placeholder="Enter the magic word..."
+                        className={`w-full bg-transparent border-b-2 border-white/20 py-4 text-center text-xl md:text-5xl text-white placeholder:text-white/20 outline-none transition-all duration-500 focus:border-rose-300 focus:text-rose-100 focus:drop-shadow-[0_0_25px_rgba(251,207,232,0.6)] font-serif italic ${error ? 'animate-shake text-rose-300 border-rose-300' : ''}`}
                         autoFocus
                         style={{ fontFamily: "'Playfair Display', serif" }}
                     />

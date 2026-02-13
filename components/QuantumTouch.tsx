@@ -306,20 +306,20 @@ export default function QuantumTouch() {
                         </div>
 
                         {/* Text Instruction */}
-                        <div className="text-center h-16">
+                        <div className="text-center h-20">
                             {/* Main instruction */}
-                            <p className={`text-xs tracking-[0.3em] uppercase transition-all duration-300 ${isHolding.current ? "text-rose-400 font-bold" : "text-white/30"}`}>
+                            <p className={`text-base md:text-lg tracking-[0.3em] uppercase transition-all duration-300 font-medium ${isHolding.current ? "text-rose-400 font-bold scale-110" : "text-rose-200/80 animate-pulse ml-1"}`}>
                                 {isHolding.current ? "HOLD TO SYNC..." : "INITIATE CONNECTION"}
                             </p>
                             {/* Subtle hint */}
                             {!isHolding.current && (
                                 <motion.p
                                     initial={{ opacity: 0 }}
-                                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                    className="text-[10px] text-white/20 mt-2 tracking-wider"
+                                    animate={{ opacity: [0.4, 1, 0.4] }}
+                                    transition={{ duration: 1.5, repeat: Infinity }}
+                                    className="text-xs text-white/50 mt-3 tracking-widest uppercase font-mono"
                                 >
-                                    Click & Hold
+                                    ( Click & Hold Fingerprint )
                                 </motion.p>
                             )}
                             {/* Charge Bar (Optional Visual) */}

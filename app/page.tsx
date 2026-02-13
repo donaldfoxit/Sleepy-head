@@ -24,43 +24,37 @@ import QuantumTouch from "@/components/QuantumTouch";
 
 import { useLenis } from "@studio-freight/react-lenis";
 
-// Helper Component for Navigation
-const ScrollPrompt = ({ to, label = "Continue" }: { to: string; label?: string }) => {
-    const lenis = useLenis(() => {
-        // called every scroll
-    });
+
+// Helper Component for Navigation (Minimal)
+const ScrollPrompt = ({ to, label, onClick }: { to: string; label?: string; onClick?: () => void }) => {
+    const lenis = useLenis(() => { });
+
+    const handleNavigation = () => {
+        if (onClick) {
+            onClick();
+        } else {
+            lenis?.scrollTo(`#${to}`, { duration: 3, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        }
+    };
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 1 }}
-            className="absolute bottom-6 left-0 right-0 z-30 flex justify-center pointer-events-none"
+        <motion.button
+            onClick={handleNavigation}
+            whileHover={{ backgroundColor: "rgba(244, 114, 182, 0.4)" }} // Rose-400 with opacity
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 px-6 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/60 text-[10px] uppercase tracking-[0.2em] font-medium transition-colors hover:text-white hover:border-rose-400/50 flex items-center justify-center pointer-events-auto shadow-[0_0_15px_rgba(244,114,182,0.2)]"
         >
-            <motion.button
-                onClick={() => lenis?.scrollTo(`#${to}`)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                animate={{
-                    boxShadow: [
-                        "0 0 20px rgba(251,207,232,0.3)",
-                        "0 0 30px rgba(251,207,232,0.5)",
-                        "0 0 20px rgba(251,207,232,0.3)"
-                    ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="pointer-events-auto px-8 py-4 bg-gradient-to-r from-rose-300/15 to-rose-400/15 backdrop-blur-sm border-2 border-rose-300/40 rounded-full text-rose-300 font-bold tracking-wider hover:bg-rose-300/25 transition-colors cursor-pointer drop-shadow-[0_0_12px_rgba(251,207,232,0.5)]"
-            >
-                Scroll or Tap to Continue
-            </motion.button>
-        </motion.div>
+            {label || "CONTINUE"}
+        </motion.button>
     );
 };
+
+
 
 export default function Home() {
     const isUnlocked = useStore((state) => state.isUnlocked);
     const [startInteraction, setStartInteraction] = useState(false);
     const [loadingComplete, setLoadingComplete] = useState(false);
+    const [showGallery, setShowGallery] = useState(false); // State for Hero -> Gallery fade
     const [isStargazerComplete, setStargazerComplete] = useState(false);
 
     return (
@@ -84,88 +78,107 @@ export default function Home() {
 
             {/* Main Content */}
             {isUnlocked && (
-                <motion.div
-                    className="relative z-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                    {/* 1. HERO (The Hook) */}
-                    <div id="hero" className="relative">
-                        <Hero />
-                        <ScrollPrompt to="gallery" label="Begin" />
-                    </div>
+                <AnimatePresence mode="wait">
+                    {!showGallery ? (
+                        <motion.div
+                            key="hero-section"
+                            className="relative z-10 min-h-screen"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }}
+                            transition={{ duration: 3, ease: "easeOut" }}
+                        >
+                            {/* 1. HERO (The Hook) */}
+                            <div id="hero" className="relative">
+                                <Hero />
+                                <ScrollPrompt
+                                    to="gallery"
+                                    label="Begin"
+                                    onClick={() => setShowGallery(true)}
+                                />
 
-                    {/* 2. GALLERY (The Vibe) */}
-                    <div id="gallery" className="relative">
-                        <Gallery />
-                        <ScrollPrompt to="manifesto" />
-                    </div>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="main-content"
+                            className="relative z-10"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 2, ease: "easeInOut" }}
+                        >
+                            {/* 2. GALLERY (The Vibe) */}
+                            <div id="gallery" className="relative">
+                                <Gallery />
+                                <ScrollPrompt to="manifesto" />
+                            </div>
 
-                    {/* 3. MANIFESTO (The Poetry) */}
-                    <div id="manifesto" className="relative">
-                        <Manifesto onComplete={() => setStargazerComplete(true)} />
-                        <ScrollPrompt to="banners" label="Read On" />
-                    </div>
+                            {/* 3. MANIFESTO (The Poetry) */}
+                            <div id="manifesto" className="relative">
+                                <Manifesto onComplete={() => setStargazerComplete(true)} />
+                                {/* Skip Flanking (banners) scroll prompt */}
+                            </div>
 
-                    {/* RESTORED: FlankingBanners */}
-                    <div id="banners" className="relative">
-                        <FlankingBanners />
-                        <ScrollPrompt to="connect-four" label="Redemption" />
-                    </div>
+                            {/* RESTORED: FlankingBanners */}
+                            <div id="banners" className="relative">
+                                <FlankingBanners />
 
-                    {/* 4. CONNECT FOUR (The Game) */}
-                    <div id="connect-four" className="relative">
-                        {/* ConnectFour has internal logic, but we wrap it for ID */}
-                        <ConnectFour />
-                        {/* ConnectFour has its own 'Proceed' button on win, but a skip might be nice? 
+                            </div>
+
+                            {/* 4. CONNECT FOUR (The Game) */}
+                            <div id="connect-four" className="relative">
+                                {/* ConnectFour has internal logic, but we wrap it for ID */}
+                                <ConnectFour />
+                                {/* ConnectFour has its own 'Proceed' button on win, but a skip might be nice? 
                              User said: "make sure she can only play in the winning position".
                              I'll leave the 'Proceed' button inside ConnectFour to handle the 'Win' state logic,
                              but maybe add a subtle skip just in case? No, let forced win happen.
                          */}
-                    </div>
+                            </div>
 
-                    {/* 5. CHAT MESSAGES (The Reality) */}
-                    <div id="chat-floating" className="relative">
-                        <ChatFloating />
-                        <ScrollPrompt to="nickname" label="The Secret" />
-                    </div>
+                            {/* 5. CHAT MESSAGES (The Reality) */}
+                            <div id="chat-floating" className="relative">
+                                <ChatFloating />
+                                <ScrollPrompt to="nickname" />
+                            </div>
 
-                    {/* 6. NICKNAME NOTE (The Secret) */}
-                    <div id="nickname" className="relative">
-                        <NicknameScreen />
-                        <ScrollPrompt to="film-reel" label="Our History" />
-                    </div>
+                            {/* 6. NICKNAME NOTE (The Secret) */}
+                            <div id="nickname" className="relative">
+                                <NicknameScreen />
+                                <ScrollPrompt to="film-reel" />
+                            </div>
 
-                    {/* 7. FILM REEL (The Timeline) */}
-                    <div id="film-reel" className="relative">
-                        <FilmReel />
-                        <ScrollPrompt to="first-kiss" label="The Spark" />
-                    </div>
+                            {/* 7. FILM REEL (The Timeline) */}
+                            <div id="film-reel" className="relative">
+                                <FilmReel />
+                                <ScrollPrompt to="first-kiss" />
+                            </div>
 
-                    {/* 7.5. FIRST KISS */}
-                    <div id="first-kiss" className="relative">
-                        <FirstKiss />
-                        <ScrollPrompt to="letter" label="Open Letter" />
-                    </div>
+                            {/* 7.5. FIRST KISS */}
+                            <div id="first-kiss" className="relative">
+                                <FirstKiss />
+                                <ScrollPrompt to="letter" />
+                            </div>
 
-                    {/* 8. LETTER (The Finale) */}
-                    <div id="letter" className="relative">
-                        <Letter />
-                        <ScrollPrompt to="proposal" label="Forever" />
-                    </div>
+                            {/* 8. LETTER (The Finale) */}
+                            <div id="letter" className="relative">
+                                <Letter />
+                                <ScrollPrompt to="proposal" label="Forever" />
+                            </div>
 
-                    {/* 9. THE PROPOSAL (Quantum Touch) */}
-                    <div id="proposal" className="relative">
-                        <QuantumTouch />
-                        {/* No next prompt, this is the end (mostly) */}
-                    </div>
+                            {/* 9. THE PROPOSAL (Quantum Touch) */}
+                            <div id="proposal" className="relative">
+                                <QuantumTouch />
+                                {/* No next prompt, this is the end (mostly) */}
+                            </div>
 
-                    {/* 10. SPOTIFY SCANNER (The Soundtrack) */}
-                    <div id="spotify" className="relative">
-                        <SpotifyScanner />
-                    </div>
-                </motion.div>
+                            {/* 10. SPOTIFY SCANNER (The Soundtrack) */}
+                            <div id="spotify" className="relative">
+                                <SpotifyScanner />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             )}
 
             {/* Grain Overlay */}
