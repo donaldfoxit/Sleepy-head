@@ -64,7 +64,7 @@ export default function CameraCapture({ isOpen, onClose, onPhotoSubmitted }: Cam
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0);
 
-        const imageData = canvas.toDataURL("image/jpeg", 0.9);
+        const imageData = canvas.toDataURL("image/jpeg", 0.7);
         setCapturedImage(imageData);
 
         // Stop camera after capture
