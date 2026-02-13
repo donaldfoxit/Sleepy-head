@@ -9,36 +9,66 @@ export default function SpotifyScanner() {
         <section className="relative w-full py-20 bg-black flex flex-col items-center justify-center overflow-hidden">
 
             {/* --- Background Glow --- */}
-            <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 via-black to-black pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-rose-900/20 via-black to-black pointer-events-none" />
 
             <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1 }}
-                className="relative z-10 p-8 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl flex flex-col items-center gap-6 max-w-sm mx-4"
+                className="relative z-10 w-full max-w-4xl px-4 flex flex-col items-center gap-12"
             >
                 {/* Header */}
-                <div className="flex items-center gap-3 text-green-400">
+                <div className="flex items-center gap-3 text-rose-400">
                     <Music size={24} />
                     <span className="text-sm font-bold tracking-widest uppercase">Our Soundtrack</span>
                 </div>
 
-                {/* Spotify Code Image Placeholder */}
-                {/* USER: Replace this src with your actual Spotify Code image URL */}
-                <div className="relative group">
-                    <div className="absolute inset-0 bg-green-500/20 blur-xl rounded-lg group-hover:bg-green-500/40 transition-colors duration-500" />
-                    <img
-                        src="https://scannables.scdn.co/uri/plain/png/000000/white/640/spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"
-                        alt="Scan on Spotify"
-                        className="relative w-64 h-auto rounded-lg shadow-lg"
-                    />
-                </div>
+                {/* PLAYERS CONTAINER */}
+                <div className="flex flex-col md:flex-row gap-8 w-full justify-center">
 
-                {/* Instruction */}
-                <div className="text-center">
-                    <h3 className="text-white font-serif text-xl mb-2">Scan to Listen</h3>
-                    <p className="text-white/40 text-xs">Open Spotify &gt; Search &gt; Camera</p>
+                    {/* PLAYER 1: ONE THING */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex-1 bg-white/5 p-4 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-sm"
+                    >
+                        <h3 className="text-center text-rose-200 font-serif italic mb-4 text-xl">One Thing</h3>
+                        <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-white/5">
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                src="https://www.youtube.com/embed/EDv7efxb4No?controls=1&rel=0"
+                                title="One Thing - Acoustic"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        </div>
+                    </motion.div>
+
+                    {/* PLAYER 2: SELFISH */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="flex-1 bg-white/5 p-4 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-sm"
+                    >
+                        <h3 className="text-center text-rose-200 font-serif italic mb-4 text-xl">Selfish</h3>
+                        <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-white/5">
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                src="https://www.youtube.com/embed/9nfuaDP2YTg?controls=1&rel=0"
+                                title="Selfish - Acoustic Cover"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        </div>
+                    </motion.div>
+
                 </div>
 
             </motion.div>
